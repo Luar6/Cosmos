@@ -1,6 +1,15 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal } from "react-native"
+import { useState } from "react";
 import { SafeAreaView } from   'react-native-safe-area-context';
+import { CreateTask } from './components/taskPage';
+
 export function Home(){
+    const [task, setViewTask] = useState(false);
+    
+    function turnVisible(){
+        return setViewTask(true);
+    }
+
     return(
         <View style={styles.container}>
             <SafeAreaView style={{flex:1}}>
@@ -10,7 +19,10 @@ export function Home(){
                 <View style={styles.content}>
                     <Text style={styles.default}>Nothing here. To add some task press the button below.</Text>
                 </View>
-                <TouchableOpacity style={styles.button}> <Text style={styles.buttonText}>+</Text> </TouchableOpacity>
+                <TouchableOpacity onPress={turnVisible} style={styles.button}> <Text style={styles.buttonText}>+</Text> </TouchableOpacity>
+                <Modal visible={task} animationType="fade">
+                    <CreateTask closeView={()=> setViewTask(false)}/>
+                </Modal>
             </SafeAreaView>
         </View>
     )
