@@ -16,7 +16,7 @@ export default function Index() {
           headerShown : false,
           tabBarShowLabel: false,
           title: "Inicio",
-          tabBarIcon: ({focused, size, color}) =>{
+          tabBarIcon: ({focused, size}) =>{
               if (focused){
                   return <Ionicons size={size} color={ "purple" } name="home"/>
               }
@@ -32,7 +32,7 @@ export default function Index() {
         options={{
           headerShown : false,
           tabBarShowLabel: false,
-          tabBarIcon: ({focused, size, color}) =>{
+          tabBarIcon: ({focused, size}) =>{
               if (focused){
                   return <Ionicons size={size} color={"purple"} name="book"/>
               }
@@ -48,7 +48,7 @@ export default function Index() {
         options={{
           headerShown : false,
           tabBarShowLabel: false,
-          tabBarIcon: ({focused, size, color}) =>{
+          tabBarIcon: ({focused, size}) =>{
               if (focused){
                   return <Ionicons size={size} color={"purple"} name="person"/>
               }

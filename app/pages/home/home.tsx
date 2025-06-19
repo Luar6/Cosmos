@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Modal } from "react-na
 import { useState } from "react";
 import { SafeAreaView } from   'react-native-safe-area-context';
 import { CreateTask } from './components/taskPage';
+import { Ionicons } from "@expo/vector-icons";
 
 export function Home(){
     const [task, setViewTask] = useState(false);
@@ -17,7 +18,8 @@ export function Home(){
                     <Text style={styles.title}>Cosmos</Text>
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.default}>Nothing here. To add some task press the button below.</Text>
+                    <Ionicons size={25} color={"gray"} name={"document-text"}/>                    
+                    <Text style={styles.default}>Nada aqui. Para adicionar alguma tarefa, pressione o botão abaixo.</Text>
                 </View>
                 <TouchableOpacity onPress={turnVisible} style={styles.button}> <Text style={styles.buttonText}>+</Text> </TouchableOpacity>
                 <Modal visible={task} animationType="fade">
@@ -50,12 +52,15 @@ const styles = StyleSheet.create({
     content:{
         height:"100%",
         alignItems: "center",
+        justifyContent:"center",
         padding: "2%",
         backgroundColor:"#FFF"
     },
 
     default:{
-        color:"gray"
+        color:"gray",
+        width:300,
+        textAlign:"center"
     },
 
     button:{
