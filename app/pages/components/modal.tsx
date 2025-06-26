@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Pressable } from "react-native"
 import { Ionicons } from "@expo/vector-icons";
-
+import { useState } from "react";
+import { TaskInfo } from './cardInfo'
 type Task = {
   title: string;
   desc: string;
@@ -16,15 +17,24 @@ type Props = {
 
 export function TaskItem({data, removeItem}:Props){
     
+    const [infoView, setInfoView] = useState(false)
+    
+    function turnVisible(){
+        setInfoView(true)
+    }
+
     return(
       <View style={styles.content}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity onPress={turnVisible} style={styles.button}>
             <Text style={styles.text}>{data.title}</Text>
 
             <TouchableOpacity style={{justifyContent:"center",height: "100%"}} onPress={removeItem}>
                 <Ionicons size={18} color={"white"} name={"trash-bin-outline"}/>
             </TouchableOpacity>
-        </TouchableOpacity>      
+        </TouchableOpacity>
+        <Modal visible={infoView}>
+            <TaskInfo data={data} closeView={()=> setInfoView(false)}/>
+        </Modal>      
       </View>  
     )
 }
