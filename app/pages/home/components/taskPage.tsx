@@ -3,21 +3,43 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
+import useStorage from '../../../data/Storage';
 
 type Props = {
     closeView: () => void;
 };
 
+type Task = {
+    title: string;
+    desc: string;
+    mat: string;
+    prof: string;
+    date: Date;
+}
+
+type StorageHook = {
+    save: (id: string, value: Task) => Promise<void>;
+}
+
 export function CreateTask({ closeView }: Props) {
 
+    const { save } = useStorage()
+    
+    // variáveis de definição de data
     const [date, setDate] = useState(new Date());
     const [showDate, setShowDate] = useState(false);
     const [showTime, setShowTime] = useState(false);
-
+    // valores dos campos de texto
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
     const [mat, setMat] = useState('');
     const [prof, setProf] = useState('');
+
+    async function saveTask (): Promise<void>{
+        const task:Task = {title,desc,mat,prof,date};
+        await save("1", task);
+        closeView();
+    }
 
     const handleChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
@@ -118,7 +140,7 @@ export function CreateTask({ closeView }: Props) {
                 </View>
             </View>
 
-            <TouchableOpacity style={styles.button}> <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"}/> <Text style={styles.buttonText}>Criar</Text> </TouchableOpacity>
+            <TouchableOpacity onPress={saveTask} style={styles.button}> <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"}/> <Text style={styles.buttonText}>Criar</Text> </TouchableOpacity>
         </View>
 
     )
@@ -192,7 +214,7 @@ const styles = StyleSheet.create({
         height:50,
         width:100,
         gap: 10,
-        backgroundColor: "rgba(131, 52, 235, 0.6)",
+        backgroundColor: "#b686f4",
         flexDirection:"row",
         alignItems: "center",
         justifyContent: "center",
