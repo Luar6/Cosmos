@@ -10,6 +10,7 @@ type Props = {
 };
 
 type Task = {
+    id:string;
     title: string;
     desc: string;
     mat: string;
@@ -22,7 +23,9 @@ type StorageHook = {
 }
 
 export function CreateTask({ closeView }: Props) {
-
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let resultado=''
+    
     const { save } = useStorage()
     
     // variáveis de definição de data
@@ -30,13 +33,17 @@ export function CreateTask({ closeView }: Props) {
     const [showDate, setShowDate] = useState(false);
     const [showTime, setShowTime] = useState(false);
     // valores dos campos de texto
+    const [id, setId] = useState('')
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
     const [mat, setMat] = useState('');
     const [prof, setProf] = useState('');
 
     async function saveTask (): Promise<void>{
-        const task:Task = {title,desc,mat,prof,date};
+        const valor = Math.floor(Math.random() *caracteres.length)
+        resultado+= caracteres.charAt(valor);
+        setId(resultado);
+        const task:Task = {id,title,desc,mat,prof,date};
         await save("1", task);
         closeView();
     }

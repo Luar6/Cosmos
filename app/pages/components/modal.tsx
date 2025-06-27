@@ -1,61 +1,74 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, Pressable } from "react-native"
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { TaskInfo } from './cardInfo'
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { TaskInfo } from './cardInfo';
+import { TaskDel } from "./cardDel";
+
 type Task = {
-  title: string;
-  desc: string;
-  mat: string;
-  prof: string;
-  date: Date;
+    id: string
+    title: string;
+    desc: string;
+    mat: string;
+    prof: string;
+    date: Date;
 };
 
 type Props = {
-    data:Task;
-    removeItem: ()=> void;
+    data: Task;
+    removeItem: (id: string) => void;
 }
 
-export function TaskItem({data, removeItem}:Props){
+export function TaskItem({ data, removeItem }: Props) {
+
+    const [infoView, setInfoView] = useState(false);
+    const [delView, setDelView] = useState(false);
     
-    const [infoView, setInfoView] = useState(false)
-    
-    function turnVisible(){
-        setInfoView(true)
+    function turnInfoVisible() {
+        setInfoView(true);
     }
 
-    return(
-      <View style={styles.content}>
-        <TouchableOpacity onPress={turnVisible} style={styles.button}>
-            <Text style={styles.text}>{data.title}</Text>
+    function turnDelVisible() {
+        setDelView(true);
+    }
+//()=>{removeItem(data.id)}
+    return (
+        <View style={styles.content}>
+            <TouchableOpacity onPress={turnInfoVisible} style={styles.button}>
+                <Text style={styles.text}>{data.title}</Text>
 
-            <TouchableOpacity style={{justifyContent:"center",height: "100%"}} onPress={removeItem}>
-                <Ionicons size={18} color={"white"} name={"trash-bin-outline"}/>
+                <TouchableOpacity style={{ justifyContent: "center", height: "100%" }} onPress={turnDelVisible}>
+                    <Ionicons size={18} color={"white"} name={"trash-bin-outline"} />
+                </TouchableOpacity>
             </TouchableOpacity>
-        </TouchableOpacity>
-        <Modal visible={infoView}>
-            <TaskInfo data={data} closeView={()=> setInfoView(false)}/>
-        </Modal>      
-      </View>  
+
+            <Modal animationType="fade" transparent={true} visible={delView}>
+                <TaskDel delItem={()=>{removeItem(data.id)}} data={data} closeView={() => setDelView(false)} />
+            </Modal>
+
+            <Modal animationType="fade" transparent={true} visible={infoView}>
+                <TaskInfo data={data} closeView={() => setInfoView(false)} />
+            </Modal>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
-    content:{
+    content: {
         width: "100%"
     },
 
-    button:{
+    button: {
         margin: 5,
         height: 50,
         backgroundColor: "#005eff",
-        alignItems:"center",
+        alignItems: "center",
         justifyContent: "space-between",
         padding: 10,
         borderRadius: 5,
-        flexDirection:"row"
+        flexDirection: "row"
     },
 
-    text:{
+    text: {
         color: "#FFF",
         fontWeight: "bold"
     },

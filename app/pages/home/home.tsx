@@ -8,6 +8,7 @@ import { TaskItem } from "../components/modal";
 import { CreateTask } from './components/taskPage';
 
 type Task = {
+    id: string
     title: string;
     desc: string;
     mat: string;
@@ -41,17 +42,19 @@ export function Home() {
                     <Text style={styles.title}>Cosmos</Text>
                 </View>
                 <View style={styles.content}>
-                    <Text style={{ color: "gray", padding: 6 }}>Atividades individuais</Text>
                     {
                         taskList && taskList.length > 0 ? (
-                            <FlatList
-                                data={taskList}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={({ item }) => <TaskItem removeItem={async () => {
-                                    const tasks = await remove("1", item)
-                                    setTaskList(tasks ?? [])
-                                }} data={item} />}
-                            />
+                            <View>
+                                <Text style={{ color: "gray", padding: 6 }}>Atividades individuais</Text>
+                                <FlatList
+                                    data={taskList}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    renderItem={({ item }) => <TaskItem removeItem={async () => {
+                                        const tasks = await remove("1", item.id)
+                                        setTaskList(tasks ?? [])
+                                    }} data={item} />}
+                                />
+                            </View>
                         ) : (
                             <View style={styles.defaultContent}>
                                 <Ionicons size={25} color={"gray"} name={"document-text"} />
