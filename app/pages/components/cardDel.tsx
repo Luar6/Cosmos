@@ -23,7 +23,6 @@ export function TaskDel({data, closeView, delItem}:Props){
     return(
       <View style={styles.container}>
         <View style={styles.content}>
-            
             <View style={styles.text}>
                 <TouchableOpacity style={styles.close}onPress={closeView}>
                     <Ionicons size={30} color={"purple"} name={"close"}/>
