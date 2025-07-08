@@ -27,10 +27,12 @@ export function TaskDel({data, closeView, delItem}:Props){
                 <TouchableOpacity style={styles.close}onPress={closeView}>
                     <Ionicons size={30} color={"purple"} name={"close"}/>
                 </TouchableOpacity>
-                <Text > Deseja realmente deletar a atividade:</Text>
+                <Text> Deseja realmente deletar a atividade:</Text>
             </View>
             <Text style={{fontSize: 18, fontWeight: "bold"}}>{data.title}?</Text>
-            <TouchableOpacity style={styles.button} onPress={finalRemove}><Text style={styles.btnText}>Deletar</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={finalRemove}>
+                <Text style={styles.btnText}>Deletar</Text>
+            </TouchableOpacity>
         </View>
       </View>  
     )

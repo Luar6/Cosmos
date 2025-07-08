@@ -63,7 +63,9 @@ export function Home() {
                         )}
 
                 </View>
-                <TouchableOpacity onPress={turnVisible} style={styles.button}> <Text style={styles.buttonText}>+</Text> </TouchableOpacity>
+                <TouchableOpacity onPress={turnVisible} style={styles.button}>
+                    <Text style={styles.buttonText}>+</Text>
+                </TouchableOpacity>
 
                 <Modal visible={task} animationType="fade">
                     <CreateTask closeView={() => {
@@ -71,7 +73,6 @@ export function Home() {
                         load();
                     }} />
                 </Modal>
-
             </SafeAreaView>
         </View>
     )

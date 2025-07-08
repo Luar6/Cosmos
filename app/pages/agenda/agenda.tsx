@@ -36,8 +36,9 @@ export function Agenda() {
                     <Ionicons size={25} color={"gray"} name={"person-add"}/>
                     <Text style={styles.default}>Você ainda não está em nenhuma agenda! clique a baixo para criar uma e convidar seus colegas de classe.</Text>
                 </View>           
-                <TouchableOpacity style={styles.btnCreate}> <Text style={styles.btnCreateTxt}>Criar um Grupo</Text> </TouchableOpacity>
-
+                <TouchableOpacity style={styles.btnCreate}>
+                    <Text style={styles.btnCreateTxt}>Criar um Grupo</Text>
+                    </TouchableOpacity>
             </SafeAreaView>
         </View>
     )
