@@ -3,10 +3,10 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-
+import { API_URL, API_KEY } from '@env';
 
 export function Agenda() {
-    const url="https://cosmos-api-two.vercel.app/docs"
+    const url=API_URL+"getAllAgendas?api_key="+API_KEY;
     const[agendas, setAgendas] = useState([]);
     useEffect(()=>{
         fetch(url)
