@@ -19,9 +19,11 @@ export function TaskInfo({data, closeView}:Props){
     return(
       <View style={styles.container}>
         <View style={styles.content}>
-            
+
             <View style={styles.header}>
-                <TouchableOpacity onPress={closeView}> <Ionicons size={30} color={"purple"} name="arrow-back-outline" /></TouchableOpacity>
+                <TouchableOpacity onPress={closeView}>
+                    <Ionicons size={30} color={"purple"} name="arrow-back-outline" />
+                </TouchableOpacity>
                 <Text style={styles.headerTitle}>{data.title}</Text>
             </View>
             

@@ -65,7 +65,9 @@ export function CreateTask({ closeView }: Props) {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={closeView}> <Ionicons size={30} color={"purple"} name="arrow-back-outline" /> </TouchableOpacity>
+                <TouchableOpacity onPress={closeView}>
+                    <Ionicons size={30} color={"purple"} name="arrow-back-outline" />
+                </TouchableOpacity>
                 <Text style={styles.pageTitle}>Criar Tarefa</Text>
             </View>
 
@@ -143,11 +145,13 @@ export function CreateTask({ closeView }: Props) {
                             onChange={handleChangeTime} // <- idem
                         />
                     )}
-
                 </View>
             </View>
 
-            <TouchableOpacity onPress={saveTask} style={styles.button}> <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"}/> <Text style={styles.buttonText}>Criar</Text> </TouchableOpacity>
+            <TouchableOpacity onPress={saveTask} style={styles.button}>
+                <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"}/>
+                <Text style={styles.buttonText}>Criar</Text>
+            </TouchableOpacity>
         </View>
 
     )

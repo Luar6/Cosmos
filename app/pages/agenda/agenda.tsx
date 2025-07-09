@@ -3,10 +3,10 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-
+import { API_URL, API_KEY } from '@env';
 
 export function Agenda() {
-    const url="https://cosmos-api-two.vercel.app/docs"
+    const url=API_URL+"getAllAgendas?api_key="+API_KEY;
     const[agendas, setAgendas] = useState([]);
     useEffect(()=>{
         fetch(url)
@@ -36,8 +36,9 @@ export function Agenda() {
                     <Ionicons size={25} color={"gray"} name={"person-add"}/>
                     <Text style={styles.default}>Você ainda não está em nenhuma agenda! clique a baixo para criar uma e convidar seus colegas de classe.</Text>
                 </View>           
-                <TouchableOpacity style={styles.btnCreate}> <Text style={styles.btnCreateTxt}>Criar um Grupo</Text> </TouchableOpacity>
-
+                <TouchableOpacity style={styles.btnCreate}>
+                    <Text style={styles.btnCreateTxt}>Criar um Grupo</Text>
+                    </TouchableOpacity>
             </SafeAreaView>
         </View>
     )
