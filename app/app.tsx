@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 
-export function App(){
+export default function App(){
     return (
         <View>
             <View>

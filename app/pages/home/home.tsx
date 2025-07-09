@@ -4,8 +4,8 @@ import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TaskItem } from "../components/modal";
-import { CreateTask } from './components/taskPage';
+import TaskItem from "../components/modal";
+import CreateTask from './components/taskPage';
 
 type Task = {
     id: string
@@ -16,7 +16,7 @@ type Task = {
     date: Date;
 }
 
-export function Home() {
+export default function Home() {
     const [task, setViewTask] = useState(false);
     const [taskList, setTaskList] = useState<Task[]>([]);
     const { get, remove } = useStorage();
@@ -135,7 +135,12 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "#FFF",
         fontSize: 20,
+        textAlign: "center",
+        textAlignVertical: "center",
+        lineHeight: 50,
         elevation: 10,
         shadowColor: "#000",
-    }
+      }
+
+
 })

@@ -3,10 +3,9 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { API_URL, API_KEY } from '@env';
 
-export function Agenda() {
-    const url=API_URL+"getAllAgendas?api_key="+API_KEY;
+export default function Agenda() {
+    const url= process.env.EXPO_PUBLIC_API_URL + "getAllAgendas?api_key=" + process.env.EXPO_PUBLIC_API_KEY;
     const[agendas, setAgendas] = useState([]);
     useEffect(()=>{
         fetch(url)
@@ -17,14 +16,14 @@ export function Agenda() {
                 else{
                     return response.json();
                 }
-            }) 
+            })
             .then(data=>{
                 setAgendas(data);
             })
             .catch(err=>{
                 console.log("Erro na requisição: "+ err)
             })
-    }, []) 
+    }, [])
 
     return (
         <View style={styles.container}>
@@ -32,10 +31,13 @@ export function Agenda() {
                 <View style={styles.header}>
                     <Text style={styles.title}>Cosmos</Text>
                 </View>
-                <View style={styles.content}> 
+                <View style={styles.content}>
                     <Ionicons size={25} color={"gray"} name={"person-add"}/>
                     <Text style={styles.default}>Você ainda não está em nenhuma agenda! clique a baixo para criar uma e convidar seus colegas de classe.</Text>
-                </View>           
+                    <Text style={styles.default}>
+                        {JSON.stringify(agendas, null, 2)}
+                    </Text>
+                </View>
                 <TouchableOpacity style={styles.btnCreate}>
                     <Text style={styles.btnCreateTxt}>Criar um Grupo</Text>
                     </TouchableOpacity>

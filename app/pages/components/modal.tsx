@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { TaskInfo } from './cardInfo';
-import { TaskDel } from "./cardDel";
+import TaskInfo from './cardInfo';
+import TaskDel from "./cardDel";
 
 type Task = {
     id: string
@@ -18,11 +18,11 @@ type Props = {
     removeItem: (id: string) => void;
 }
 
-export function TaskItem({ data, removeItem }: Props) {
+export default function TaskItem({ data, removeItem }: Props) {
 
     const [infoView, setInfoView] = useState(false);
     const [delView, setDelView] = useState(false);
-    
+
     function turnInfoVisible() {
         setInfoView(true);
     }
