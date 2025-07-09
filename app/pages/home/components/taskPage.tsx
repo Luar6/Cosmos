@@ -22,12 +22,12 @@ type StorageHook = {
     save: (id: string, value: Task) => Promise<void>;
 }
 
-export function CreateTask({ closeView }: Props) {
+export default function CreateTask({ closeView }: Props) {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let resultado=''
-    
+
     const { save } = useStorage()
-    
+
     // variáveis de definição de data
     const [date, setDate] = useState(new Date());
     const [showDate, setShowDate] = useState(false);
@@ -115,15 +115,15 @@ export function CreateTask({ closeView }: Props) {
 
                 <View style={styles.contentInputDate}>
                     <Text style={styles.tytleInput}>Data</Text>
-                    <TouchableOpacity 
-                        style={styles.dateBtn} 
+                    <TouchableOpacity
+                        style={styles.dateBtn}
                         onPress={() => setShowDate(true)}>
                             <Text>{date.toLocaleDateString()}</Text>
                     </TouchableOpacity>
-                    
+
                     <Text style={styles.tytleInput}>Hora</Text>
-                    <TouchableOpacity 
-                        style={styles.dateBtn} 
+                    <TouchableOpacity
+                        style={styles.dateBtn}
                         onPress={() => setShowTime(true)}>
                             <Text>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                     </TouchableOpacity>

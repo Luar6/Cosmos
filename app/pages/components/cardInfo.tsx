@@ -14,8 +14,8 @@ type Props={
     closeView: ()=> void;
 }
 
-export function TaskInfo({data, closeView}:Props){
-    
+export default function TaskInfo({data, closeView}:Props){
+
     return(
       <View style={styles.container}>
         <View style={styles.content}>
@@ -26,7 +26,7 @@ export function TaskInfo({data, closeView}:Props){
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>{data.title}</Text>
             </View>
-            
+
             <Text style={styles.subtitle}>Descrição</Text>
             <View style={styles.wrapper}>
                 <Text>{data.desc}</Text>
@@ -43,7 +43,7 @@ export function TaskInfo({data, closeView}:Props){
             </View>
 
         </View>
-      </View>  
+      </View>
     )
 }
 

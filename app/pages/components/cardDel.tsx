@@ -15,7 +15,7 @@ type Props={
     delItem: ()=> void;
 }
 
-export function TaskDel({data, closeView, delItem}:Props){
+export default function TaskDel({data, closeView, delItem}:Props){
     function finalRemove(){
         delItem()
         closeView()
@@ -34,7 +34,7 @@ export function TaskDel({data, closeView, delItem}:Props){
                 <Text style={styles.btnText}>Deletar</Text>
             </TouchableOpacity>
         </View>
-      </View>  
+      </View>
     )
 }
 
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     },
 
     text:{
-        width:"100%",    
+        width:"100%",
         alignItems:"center",
     },
 
