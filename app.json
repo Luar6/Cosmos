@@ -1,22 +1,25 @@
 {
   "expo": {
     "name": "Cosmos",
-    "slug": "Cosmos",
+    "slug": "cosmos",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/cosmos.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "cosmos",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.luar6.cosmos",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -33,10 +36,19 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f432b8bf-66ae-40ea-8a27-4286b08b0468"
+      }
+    },
+    "owner": "leandro212"
   }
 }
