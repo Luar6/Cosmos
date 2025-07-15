@@ -3,10 +3,22 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { AgendaItem } from "./components/agendaItem";
+import { CreateAgenda } from "./createGroup";
+import { useIsFocused } from "@react-navigation/native"; 
+
+type Agendas = {
+    nome: string
+    uID_adm: string
+    api_key: string
+}
 
 export default function Agenda() {
     const url= process.env.EXPO_PUBLIC_API_URL + "getAllAgendas?api_key=" + process.env.EXPO_PUBLIC_API_KEY;
-    const[agendas, setAgendas] = useState([]);
+    const[agendas, setAgendas] = useState<Agendas[]>([]);
+    const[visibleCreateGroup, setVisibleCreate] = useState(false);
+    const focused = useIsFocused();
+
     useEffect(()=>{
         fetch(url)
             .then(response=>{
@@ -19,23 +31,42 @@ export default function Agenda() {
             })
             .then(data=>{
                 setAgendas(data);
+                console.log("req done!")
             })
             .catch(err=>{
                 console.log("Erro na requisição: "+ err)
             })
-    }, [])
+    }, [focused])
 
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
                 <View style={styles.content}>
-                    <Ionicons size={25} color={"gray"} name={"person-add"}/>
-                    <Text style={styles.default}>Você ainda não está em nenhuma agenda! clique a baixo para criar uma e convidar seus colegas de classe.</Text>
-                    <Text style={styles.default}>
-                        {JSON.stringify(agendas, null, 2)}
-                    </Text>
+                    {
+                        agendas && agendas.length > 0 ? (
+                            <View>
+                                <FlatList
+                                    data={agendas}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    renderItem={({item})=>(
+                                        <AgendaItem data={item}/>
+                                    )}
+                                />
+                            </View>
+                        ) : (
+                            <View style={styles.default}>
+                                <Ionicons size={25} color={"gray"} name={"person-add"}/>
+                                <Text style={styles.default}>Você ainda não está em nenhuma agenda! clique a baixo para criar uma e convidar seus colegas de classe.</Text>
+                            </View>
+                        )
+                    }
                 </View>
-                <TouchableOpacity style={styles.btnCreate}>
+
+                <Modal animationType="fade" visible={visibleCreateGroup}>
+                    <CreateAgenda handleClose={()=> setVisibleCreate(false)}/>
+                </Modal>
+
+                <TouchableOpacity onPress={()=> setVisibleCreate(true)} style={styles.btnCreate}>
                     <Text style={styles.btnCreateTxt}>Criar um Grupo</Text>
                     </TouchableOpacity>
             </SafeAreaView>
@@ -82,6 +113,7 @@ const styles = StyleSheet.create({
     },
 
     default: {
+        alignItems: "center",
         color: "gray",
         width: 300,
         textAlign: "center"

@@ -17,10 +17,6 @@ type Task = {
     date: Date;
 }
 
-type StorageHook = {
-    save: (id: string, value: Task) => Promise<void>;
-}
-
 export default function CreateTask({ closeView }: Props) {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let resultado=''
@@ -71,7 +67,7 @@ export default function CreateTask({ closeView }: Props) {
             </View>
 
             <View style={styles.content}>
-                <View style={styles.contentInput}>
+                <View>
                     <Text style={styles.tytleInput}>Nome</Text>
                     <TextInput
                         style={styles.textInput}
@@ -80,7 +76,7 @@ export default function CreateTask({ closeView }: Props) {
                         onChangeText={setTitle}
                     />
                 </View>
-                <View style={styles.contentInput}>
+                <View>
                     <Text style={styles.tytleInput}>Descrição</Text>
                     <TextInput
                         style={styles.textInputDescription}
@@ -92,7 +88,7 @@ export default function CreateTask({ closeView }: Props) {
                     />
                 </View>
 
-                <View style={styles.contentInput}>
+                <View>
                     <Text style={styles.tytleInput}>Matéria</Text>
                     <TextInput
                         style={styles.textInput}
@@ -102,7 +98,7 @@ export default function CreateTask({ closeView }: Props) {
                     />
                 </View>
 
-                <View style={styles.contentInput}>
+                <View>
                     <Text style={styles.tytleInput}>Professor</Text>
                     <TextInput
                         style={styles.textInput}
@@ -166,8 +162,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        paddingBottom: 30
-
+        paddingBottom: 30,
+        height: 80
     },
 
     content: {
@@ -177,11 +173,7 @@ const styles = StyleSheet.create({
     pageTitle: {
         fontSize: 25
     },
-
-    contentInput: {
-        justifyContent: "center",
-    },
-
+  
     tytleInput: {
         paddingLeft: 15,
         color: "rgba(96, 39, 170, 0.6)"
@@ -191,7 +183,7 @@ const styles = StyleSheet.create({
         width: "99%",
         height: 117,
         paddingLeft: 15,
-        paddingRight: 15,
+        paddingTop: 15,
         borderWidth: 1,
         borderColor: "rgba(96, 39, 170, 0.6)",
         borderRadius: 4
@@ -236,8 +228,6 @@ const styles = StyleSheet.create({
 
     buttonText:{
         color:"#FFF",
-        fontSize: 17,
-        elevation: 10,
-        shadowColor: "#000",
+        fontSize: 17
     }
 })

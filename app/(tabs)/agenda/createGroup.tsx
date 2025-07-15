@@ -1,159 +1,73 @@
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import useStorage from '@data/Storage';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type Props = {
-    closeView: () => void;
-};
-
-type Task = {
-    id:string;
-    title: string;
-    desc: string;
-    mat: string;
-    prof: string;
-    date: Date;
+    handleClose: () => void
 }
 
-type StorageHook = {
-    save: (id: string, value: Task) => Promise<void>;
-}
+export function CreateAgenda({ handleClose }: Props) {
 
-export default function CreateTask({ closeView }: Props) {
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let resultado=''
+    const [agendaName, setAgendaName] = useState('');
+    const [uidAdm, setUidAdm] = useState('');
+    const cadastrarAgenda = async () => {
+        const nome = encodeURIComponent(agendaName);
+        const uid = encodeURIComponent(uidAdm);
+        const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? "");
 
-    const { save } = useStorage()
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda/?nome_agenda=${nome}&uid_do_responsavel=${uid}&api_key=${chave}`;
 
-    // variáveis de definição de data
-    const [date, setDate] = useState(new Date());
-    const [showDate, setShowDate] = useState(false);
-    const [showTime, setShowTime] = useState(false);
-    // valores dos campos de texto
-    const [id, setId] = useState('')
-    const [title, setTitle] = useState('');
-    const [desc, setDesc] = useState('');
-    const [mat, setMat] = useState('');
-    const [prof, setProf] = useState('');
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+            });
 
-    async function saveTask (): Promise<void>{
-        const valor = Math.floor(Math.random() *caracteres.length)
-        resultado+= caracteres.charAt(valor);
-        setId(resultado);
-        const task:Task = {id,title,desc,mat,prof,date};
-        await save("1", task);
-        closeView();
-    }
-
-    const handleChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
-        if (event.type === 'set' && selectedDate) {
-            setDate(selectedDate);
+            const json = await response.json();
+            console.log("Resposta da API:", json);
+        } catch (error) {
+            console.log("Erro ao cadastrar:", error);
         }
-        setShowDate(false);
-    }
-
-    const handleChangeTime = (event: DateTimePickerEvent, selectedDate?: Date): void => {
-        if (event.type === 'set' && selectedDate) {
-            setDate(selectedDate);
-        }
-        setShowTime(false);
     };
+
+    function saveAndClose(){
+        cadastrarAgenda();
+        handleClose();
+    }
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={closeView}>
-                    <Ionicons size={30} color={"purple"} name="arrow-back-outline" />
+                <TouchableOpacity onPress={handleClose}>
+                    <Ionicons size={30} color={"purple"} name={"arrow-back-outline"} />
                 </TouchableOpacity>
-                <Text style={styles.pageTitle}>Criar Tarefa</Text>
+                <Text style={{ fontSize: 25 }}>Criar Agenda</Text>
             </View>
-
-            <View style={styles.content}>
-                <View style={styles.contentInput}>
-                    <Text style={styles.tytleInput}>Nome</Text>
+            <View style={{ gap: 20 }}>
+                <View>
+                    <Text style={styles.titleInput}>Nome</Text>
                     <TextInput
                         style={styles.textInput}
-                        placeholder='Digite o nome da tarefa'
-                        value={title}
-                        onChangeText={setTitle}
+                        placeholder='Digite o nome da agenda'
+                        value={agendaName}
+                        onChangeText={setAgendaName}
                     />
                 </View>
-                <View style={styles.contentInput}>
-                    <Text style={styles.tytleInput}>Descrição</Text>
-                    <TextInput
-                        style={styles.textInputDescription}
-                        placeholder='Digite a descrição da tarefa'
-                        multiline
-                        textAlignVertical='top'
-                        value={desc}
-                        onChangeText={setDesc}
-                    />
-                </View>
-
-                <View style={styles.contentInput}>
-                    <Text style={styles.tytleInput}>Matéria</Text>
+                <View>
+                    <Text style={styles.titleInput}>ID</Text>
                     <TextInput
                         style={styles.textInput}
-                        placeholder='Digite o nome da matéria'
-                        value={mat}
-                        onChangeText={setMat}
+                        placeholder='Digite o ID do responsável pela agenda'
+                        value={uidAdm}
+                        onChangeText={setUidAdm}
                     />
-                </View>
-
-                <View style={styles.contentInput}>
-                    <Text style={styles.tytleInput}>Professor</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder='Digite o nome do Professor'
-                        value={prof}
-                        onChangeText={setProf}
-                    />
-                </View>
-
-                <View style={styles.contentInputDate}>
-                    <Text style={styles.tytleInput}>Data</Text>
-                    <TouchableOpacity
-                        style={styles.dateBtn}
-                        onPress={() => setShowDate(true)}>
-                            <Text>{date.toLocaleDateString()}</Text>
-                    </TouchableOpacity>
-
-                    <Text style={styles.tytleInput}>Hora</Text>
-                    <TouchableOpacity
-                        style={styles.dateBtn}
-                        onPress={() => setShowTime(true)}>
-                            <Text>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                    </TouchableOpacity>
-
-                    {showDate && (
-                        <DateTimePicker
-                            value={date}
-                            mode="date"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={handleChangeDate}
-                        />
-                    )}
-
-                    {showTime && (
-                        <DateTimePicker
-                            value={date}
-                            mode="time"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={handleChangeTime} // <- idem
-                        />
-                    )}
-
                 </View>
             </View>
-
-            <TouchableOpacity onPress={saveTask} style={styles.button}>
-                <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"}/>
-                <Text style={styles.buttonText}>Criar</Text>
+            <TouchableOpacity onPress={saveAndClose} style={styles.button}>
+                <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"} />
+                <Text style={styles.buttonText}>Confirmar</Text>
             </TouchableOpacity>
         </View>
-    );
+    )
 }
 
 const styles = StyleSheet.create({
@@ -164,37 +78,10 @@ const styles = StyleSheet.create({
 
     header: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: "center",
         gap: 10,
-        paddingBottom: 30
-
-    },
-
-    content: {
-        gap: 20
-    },
-
-    pageTitle: {
-        fontSize: 25
-    },
-
-    contentInput: {
-        justifyContent: "center",
-    },
-
-    tytleInput: {
-        paddingLeft: 15,
-        color: "rgba(96, 39, 170, 0.6)"
-    },
-
-    textInputDescription: {
-        width: "99%",
-        height: 117,
-        paddingLeft: 15,
-        paddingRight: 15,
-        borderWidth: 1,
-        borderColor: "rgba(96, 39, 170, 0.6)",
-        borderRadius: 4
+        paddingBottom: 30,
+        height: 80
     },
 
     textInput: {
@@ -207,37 +94,27 @@ const styles = StyleSheet.create({
         borderRadius: 4
     },
 
-    contentInputDate: {
-        flexDirection:"row",
+    titleInput: {
+        paddingLeft: 15,
+        color: "rgba(96, 39, 170, 0.6)"
     },
 
-    dateBtn:{
-        flex:1,
-        borderWidth:1,
-        margin:5,
-        padding:10,
-        borderColor: "rgba(96, 39, 170, 0.6)",
-        borderRadius:4,
-    },
-
-    button:{
-        height:50,
-        width:100,
+    button: {
+        height: 50,
+        width: 130,
         gap: 10,
         backgroundColor: "#b686f4",
-        flexDirection:"row",
+        flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 15,
-        position:"absolute",
-        right:20,
+        position: "absolute",
+        right: 20,
         bottom: 20,
     },
 
-    buttonText:{
-        color:"#FFF",
+    buttonText: {
+        color: "#FFF",
         fontSize: 17,
-        elevation: 10,
-        shadowColor: "#000",
     }
 })

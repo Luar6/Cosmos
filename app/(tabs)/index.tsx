@@ -57,8 +57,8 @@ export default function Home() {
                                 <Ionicons size={25} color={"gray"} name={"document-text"} />
                                 <Text style={styles.default}>Nada aqui. Para adicionar alguma tarefa, pressione o botão abaixo.</Text>
                             </View>
-                        )}
-
+                        )
+                    }
                 </View>
                 <TouchableOpacity onPress={turnVisible} style={styles.button}>
                     <Text style={styles.buttonText}>+</Text>
