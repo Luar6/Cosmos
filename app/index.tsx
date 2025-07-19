@@ -1,73 +1,128 @@
-import React, { useEffect } from 'react';
-import { Text, Button, StyleSheet, View, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Image } from 'expo-image';
-import { Asset } from 'expo-asset';
-import { GoogleSignin, isSuccessResponse, isErrorWithCode, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
-import app from '../firebaseConfig';  // <-- import the initialized firebase app
-import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
+import {
+  GoogleSignin,
+  statusCodes,
+  GoogleSigninButton,
+} from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
 
-const auth = getAuth(app); // <-- get auth instance with initialized app
+const AuthScreen = () => {
+  const [user, setUser] = useState(null);
+  const [initializing, setInitializing] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-const appIcon = Asset.fromModule(require('../assets/images/icon.png')).uri;
-
-export default function SplashScreen() {
+  // ✅ Configure Google Sign-In once
   useEffect(() => {
     GoogleSignin.configure({
-      iosClientId: "773571645758-b2sieoo74u60nnoemi18qjetefrffhl3.apps.googleusercontent.com",
-      webClientId: "773571645758-b3evl4bja756le6i8dov4ne641r28pjr.apps.googleusercontent.com",
-      profileImageSize: 150
+      webClientId: '773571645758-b3evl4bja756le6i8dov4ne641r28pjr.apps.googleusercontent.com',
     });
-  });
+  }, []);
 
-  const handleGoogleSignIn = async() => {
+  // ✅ Listen to Firebase auth state
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(currentUser => {
+      setUser(currentUser);
+      if (initializing) setInitializing(false);
+    });
+
+    return unsubscribe; // cleanup listener
+  }, [initializing]);
+
+  // ✅ Sign in with Google
+  const signInWithGoogle = useCallback(async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
-      if (isSuccessResponse(response)) {
-        const { idToken, user } = response.data;
-        const { name, email, photo } = user;
-      } else {
-        console.log("Google Sign-in was cancelled")
-      }
+      setLoading(true);
+
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const { idToken } = await GoogleSignin.signIn();
+
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      await auth().signInWithCredential(googleCredential);
     } catch (error) {
-      if (isErrorWithCode(error)) {
-        switch (error.code) {
-          case statusCodes.IN_PROGRESS:
-            console.log("Google Sign-in is in progress")
-            break;
-          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            console.log("Play Services is not available")
-            break
-          default:
-            console.log(error.code)
-        }
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.warn('User cancelled the login flow');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.warn('Sign in is in progress already');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.warn('Play services not available or outdated');
+      } else {
+        console.error('Google Sign-In error:', error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // ✅ Sign out
+  const signOut = async () => {
+    try {
+      await GoogleSignin.revokeAccess();
+      await auth().signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
-  return (
-    <LinearGradient
-      colors={['#BA43CE', '#6900FD']}
-      start={{ x: 0, y: 0.36 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.container}
-    >
-      <View style={styles.row}>
-        <Image source={{ uri: appIcon }} style={{ width: 80, height: 80, marginRight: 10 }} />
-        <Text style={styles.title}>Cosmos</Text>
-      </View>
-      <GoogleSigninButton
-        size={GoogleSigninButton.Size.Wide}
-        color={GoogleSigninButton.Color.Dark}
-        onPress={handleGoogleSignIn}
-      />;
-    </LinearGradient>
-  );
-}
+  if (initializing) return null;
 
+  return (
+    <SafeAreaView style={styles.container}>
+      {user ? (
+        <View style={styles.center}>
+          <Text style={styles.welcome}>Welcome, {user.email}</Text>
+          <TouchableOpacity onPress={signOut} style={styles.button}>
+            <Text style={styles.buttonText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.center}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#000" />
+          ) : (
+            <GoogleSigninButton
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={signInWithGoogle}
+            />
+          )}
+        </View>
+      )}
+    </SafeAreaView>
+  );
+};
+
+export default AuthScreen;
+
+// --- Styles ---
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
-  title: { fontSize: 60, color: 'white' },
-})};
+  container: {
+    flex: 1,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcome: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#222',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+});

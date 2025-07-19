@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import useStorage from '@data/Storage';
+import useStorage from '@/data/Storage';
 
 type Props = {
     closeView: () => void;
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     pageTitle: {
         fontSize: 25
     },
-  
+
     tytleInput: {
         paddingLeft: 15,
         color: "rgba(96, 39, 170, 0.6)"
