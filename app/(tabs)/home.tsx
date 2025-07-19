@@ -4,7 +4,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import TaskItem from "@components/modal";
+import TaskItem from "@/components/modal";
 import CreateTask from './home/taskPage';
 
 type Task = {

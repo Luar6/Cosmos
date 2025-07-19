@@ -59,6 +59,6 @@ Salvando, a senha será armazenada na pagina de "Minhas senhas", nela temos duas
 
 1. Execute o comando abaixo no diretório do projeto.
     ```sh
-    npx expo start
+    npx expo run:android
     ```
-2. Escaneie o QR code com o aplicativo Expo Go no seu dispositivo móvel ou execute no emulador de sua preferência.
+2. Conecte o seu telefone por meio do USB com Depuração USB.

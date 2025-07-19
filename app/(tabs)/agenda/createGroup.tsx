@@ -6,7 +6,7 @@ type Props = {
     handleClose: () => void
 }
 
-export function CreateAgenda({ handleClose }: Props) {
+export default function CreateAgenda({ handleClose }: Props) {
 
     const [agendaName, setAgendaName] = useState('');
     const [uidAdm, setUidAdm] = useState('');
@@ -15,7 +15,7 @@ export function CreateAgenda({ handleClose }: Props) {
         const uid = encodeURIComponent(uidAdm);
         const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? "");
 
-        const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda/?nome_agenda=${nome}&uid_do_responsavel=${uid}&api_key=${chave}`;
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda?nome_agenda=${nome}&uid_do_responsavel=${uid}&api_key=${chave}`;
 
         try {
             const response = await fetch(url, {
@@ -50,6 +50,8 @@ export function CreateAgenda({ handleClose }: Props) {
                         placeholder='Digite o nome da agenda'
                         value={agendaName}
                         onChangeText={setAgendaName}
+                        accessibilityLabel="Nome da Agenda"
+                        nativeID="agendaNameInput"
                     />
                 </View>
                 <View>
@@ -59,6 +61,8 @@ export function CreateAgenda({ handleClose }: Props) {
                         placeholder='Digite o ID do responsável pela agenda'
                         value={uidAdm}
                         onChangeText={setUidAdm}
+                        accessibilityLabel="ID do Responsável"
+                        nativeID="uidAdmInput"
                     />
                 </View>
             </View>
