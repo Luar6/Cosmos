@@ -1,4 +1,4 @@
-{
+export default {
   "expo": {
     "name": "Cosmos",
     "slug": "cosmos",
@@ -20,7 +20,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.luar6.cosmos",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": process.env.GOOGLE_SERVICES_JSON || "./google-services.json"
     },
     "web": {
       "bundler": "metro",
