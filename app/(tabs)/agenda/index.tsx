@@ -6,54 +6,82 @@ import { Ionicons } from "@expo/vector-icons";
 import AgendaItem from "./components/agendaItem";
 import CreateAgenda from "./createGroup";
 import { useIsFocused } from "@react-navigation/native";
+import { getApp } from '@react-native-firebase/app';
+import { getAuth } from '@react-native-firebase/auth';
 
 type Agendas = {
     nome_agenda: string
-    uid_do_responsável: string
     chave_de_convite: string
+    firstCreated: string
 }
 
 export default function Agenda() {
-    const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllAgendas?api_key=${process.env.EXPO_PUBLIC_API_KEY}`;
+    const [userUid, setUserUid] = useState<string | null>(null);
+
+    useEffect(() => {
+        const auth = getAuth(getApp());
+        setUserUid(auth.currentUser?.uid ?? null);
+    }, []);
+
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllAgendasLinkedToUser?uid_do_responsavel=${userUid}&api_key=${process.env.EXPO_PUBLIC_API_KEY}`;
     const [agendas, setAgendas] = useState<Agendas[]>([]);
     const [visibleCreateGroup, setVisibleCreate] = useState(false);
     const focused = useIsFocused();
 
+    const fetchAgendas = () => {
+        fetch(url)
+          .then(async response => {
+            if (!response.ok) {
+              const errorText = await response.text();
+              setAgendas([]);
+              throw new Error(`${response.status} - ${errorText}`);
+            } else {
+              return response.json();
+            }
+          })
+          .then(data => {
+            console.log("Fetched data:", data);
+            setAgendas(data);
+            console.log("req done!")
+          })
+          .catch(err => {
+            console.log("Erro na requisição: " + err);
+          });
+    };
+
     useEffect(()=>{
         if (!focused) return;
-
-        fetch(url)
-            .then(response=>{
-                if(!response.ok){
-                    throw new Error("erro ao realizar a requisição");
-                }
-                else{
-                    return response.json();
-                }
-            })
-            .then(data=>{
-                console.log("Fetched data:", data);
-                setAgendas(data);
-                console.log("req done!")
-            })
-            .catch(err=>{
-                console.log("Erro na requisição: "+ err)
-            })
+        fetchAgendas();
     }, [focused])
+
+    const agendaArray = Object.entries(agendas).map(([id, value]) => ({
+        id,
+        ...value,
+    })).sort((a, b) => new Date(b.firstCreated).getTime() - new Date(a.firstCreated).getTime());
+
+    /*
+    console.log(agendas)
+    console.log(Object.keys(agendas).length)
+    console.log(agendaArray)
+     */
+
+    const onAgendaCreated = () => {
+        fetchAgendas();
+    };
 
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
                 <View style={styles.content}>
                     {
-                        agendas && agendas.length > 0 ? (
-                            <View>
+                        agendas && Object.keys(agendas).length > 0 ? (
+                            <View style={{ flex: 1, width: '100%' }}>
                                 <FlatList
-                                    data={agendas}
-                                    keyExtractor={(item, index) => index.toString()}
+                                    data={agendaArray}
                                     renderItem={({item})=>(
                                         <AgendaItem data={item}/>
                                     )}
+                                    keyExtractor={(item, index) => index.toString()}
                                 />
                             </View>
                         ) : (
@@ -66,12 +94,12 @@ export default function Agenda() {
                 </View>
 
                 <Modal animationType="fade" visible={visibleCreateGroup}>
-                    <CreateAgenda handleClose={()=> setVisibleCreate(false)}/>
+                    <CreateAgenda handleClose={()=> setVisibleCreate(false)} onCreated={onAgendaCreated}/>
                 </Modal>
 
                 <TouchableOpacity onPress={()=> setVisibleCreate(true)} style={styles.btnCreate}>
                     <Text style={styles.btnCreateTxt}>Criar um Grupo</Text>
-                    </TouchableOpacity>
+                </TouchableOpacity>
             </SafeAreaView>
         </View>
     )

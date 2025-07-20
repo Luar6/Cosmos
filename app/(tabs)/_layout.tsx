@@ -14,14 +14,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="agenda/index"
         options={{
-          title: 'Agenda',
+          title: 'Agendas',
           tabBarIcon: ({ color }) => <Ionicons size={28} name="book" color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: 'Perfil',
           tabBarIcon: ({ color }) => <Ionicons size={28} name="person-circle" color={color} />,
         }}
       />
