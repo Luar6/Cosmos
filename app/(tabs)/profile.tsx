@@ -38,7 +38,7 @@ export default function Profile() {
                 <Text style={styles.displayName}>{user?.displayName || 'User'}</Text>
                 <Text style={styles.email}>{user?.email}</Text>
                 <TouchableOpacity onPress={signOut} style={styles.signOutButton} activeOpacity={0.8}>
-                    <Text style={styles.signOutText}>Sign Out</Text>
+                    <Text style={styles.signOutText}>Sair</Text>
                 </TouchableOpacity>
             </View>
         </View>
