@@ -1,0 +1,78 @@
+name: Expo Android Dev Build
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: current
+
+      - name: Install Expo & EAS CLI
+        run: npm install -g expo-cli eas-cli
+
+      - name: Authenticate with Expo
+        run: eas whoami || eas login --token ${{ secrets.EXPO_TOKEN }}
+
+      - name: Start Android build (development profile)
+        id: eas-build
+        run: |
+          build_info=$(eas build --platform android --profile development --non-interactive --json)
+          build_id=$(echo $build_info | jq -r '.builds.android.buildId')
+          echo "build_id=$build_id" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Wait for build to complete
+        run: |
+          eas build:wait --build-id ${{ steps.eas-build.outputs.build_id }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get next tag
+        id: tag
+        run: |
+          latest_tag=$(gh release list --limit 100 | grep '^r[0-9]' | awk '{print $1}' | sort -Vr | head -n 1)
+          if [[ -z "$latest_tag" ]]; then
+            next_tag="r1"
+          else
+            number=${latest_tag#r}
+            next_tag="r$((number + 1))"
+          fi
+          echo "tag=$next_tag" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download APK artifact and rename
+        id: download
+        run: |
+          url=$(eas build:view --build-id ${{ steps.eas-build.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
+          filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
+          curl -L "$url" -o "$filename"
+          echo "apk=$filename" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get commit message
+        id: commit
+        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub pre-release with renamed APK
+        run: |
+          gh release create ${{ steps.tag.outputs.tag }} \
+            --prerelease \
+            --title "${{ steps.tag.outputs.tag }}" \
+            --notes "${{ steps.commit.outputs.message }}" \
+            "${{ steps.download.outputs.apk }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
