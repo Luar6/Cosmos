@@ -22,7 +22,7 @@ export default function Profile() {
             const auth = getAuth(getApp());
             await auth.signOut();
 
-            router.navigate('/');
+            router.replace('/');
         } catch (error) {
             console.error('Sign out error', error);
         }

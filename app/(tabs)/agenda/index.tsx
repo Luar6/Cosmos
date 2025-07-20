@@ -3,7 +3,7 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import AgendaItem from "./components/agendaItem";
+import AgendaItem from "@/components/agendaItem";
 import CreateAgenda from "./createGroup";
 import { useIsFocused } from "@react-navigation/native";
 import { getApp } from '@react-native-firebase/app';
