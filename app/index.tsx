@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Button } from "react-native";
+import { StyleSheet, Text, View, Button, TouchableOpacity, Image } from "react-native";
 import { GoogleSignin, isSuccessResponse, User } from "@react-native-google-signin/google-signin";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithCredential } from '@react-native-firebase/auth';
 import { useRouter } from 'expo-router';
-
+import { LinearGradient } from 'expo-linear-gradient';
 // Configure Google Sign-In
 GoogleSignin.configure({
   webClientId: "773571645758-b3evl4bja756le6i8dov4ne641r28pjr.apps.googleusercontent.com"
@@ -42,13 +42,25 @@ export default function App() {
   if (initializing) return null;
 
   return (
-    <View style={styles.container}>
+    <LinearGradient 
+      colors={['#BA43CE','#6900FD']}
+      style={styles.container}>
+      <View style={styles.content}>
+        <Image
+          style={{width: 100, height:100}}
+          source={require('@/assets/images/icon.png')}
+        />
+        <Text style={styles.text}>Cosmos</Text>
+      </View>
       {!user ? (
-        <Button title="Entrar com Google" onPress={handleGoogleSignIn} />
+        <TouchableOpacity style={styles.btn}onPress={handleGoogleSignIn}>  
+          <Image source={require('@/assets/images/logo-google.png')} style={{width: 20, height: 20}}/>
+          <Text style={styles.textBtn}>Continuar com o Google</Text>
+        </TouchableOpacity>
       ) : (
         <Text>Welcome {user.email}</Text>
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -59,4 +71,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  btn:{
+    flexDirection:"row",
+    gap: 5,
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    padding: 10,
+    borderRadius: 8
+  },
+  textBtn:{
+    fontWeight: "500",
+    fontSize: 16
+  },
+  content:{
+    flexDirection:"row",
+    gap: 8,  
+    alignItems: "center",
+    marginBottom: "20%"
+  },
+  text:{
+    color:"#FFF",
+    fontWeight:"500",
+    fontSize: 50
+  }
 });
