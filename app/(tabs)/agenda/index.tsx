@@ -3,23 +3,25 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { AgendaItem } from "./components/agendaItem";
-import { CreateAgenda } from "./createGroup";
-import { useIsFocused } from "@react-navigation/native"; 
+import AgendaItem from "./components/agendaItem";
+import CreateAgenda from "./createGroup";
+import { useIsFocused } from "@react-navigation/native";
 
 type Agendas = {
-    nome: string
-    uID_adm: string
-    api_key: string
+    nome_agenda: string
+    uid_do_responsável: string
+    chave_de_convite: string
 }
 
 export default function Agenda() {
-    const url= process.env.EXPO_PUBLIC_API_URL + "getAllAgendas?api_key=" + process.env.EXPO_PUBLIC_API_KEY;
-    const[agendas, setAgendas] = useState<Agendas[]>([]);
-    const[visibleCreateGroup, setVisibleCreate] = useState(false);
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllAgendas?api_key=${process.env.EXPO_PUBLIC_API_KEY}`;
+    const [agendas, setAgendas] = useState<Agendas[]>([]);
+    const [visibleCreateGroup, setVisibleCreate] = useState(false);
     const focused = useIsFocused();
 
     useEffect(()=>{
+        if (!focused) return;
+
         fetch(url)
             .then(response=>{
                 if(!response.ok){
@@ -30,6 +32,7 @@ export default function Agenda() {
                 }
             })
             .then(data=>{
+                console.log("Fetched data:", data);
                 setAgendas(data);
                 console.log("req done!")
             })

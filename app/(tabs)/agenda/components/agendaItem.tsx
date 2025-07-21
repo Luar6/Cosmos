@@ -2,15 +2,15 @@ import {Text, View} from 'react-native'
 
 type Props={
     data: {
-        nome: string
-        uID_adm: string
-        api_key: string
+        nome_agenda: string
+        uid_do_responsável: string
+        chave_de_convite: string
     }
 }
-export function AgendaItem({data}: Props){
+export default function AgendaItem({data}: Props){
     return(
         <View>
-            <Text>{data.nome}</Text>
+            <Text>{data.nome_agenda}</Text>
         </View>
-    )    
+    )
 }
