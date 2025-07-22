@@ -31,9 +31,26 @@ jobs:
         run: |
           echo "build_id=$(echo '${{ steps.eas-build.outputs.stdout }}' | jq -r '.builds.android.buildId')" >> $GITHUB_OUTPUT
 
-      - name: Wait for build to complete
+      - name: Wait for build to complete (polling)
         run: |
-          eas build:wait --build-id ${{ steps.extract-id.outputs.build_id }}
+          build_id=${{ steps.extract-id.outputs.build_id }}
+          echo "Waiting for build $build_id to complete..."
+
+          while true; do
+            status=$(eas build:view "$build_id" --json | jq -r '.status')
+            echo "Current status: $status"
+
+            if [[ "$status" == "FINISHED" ]]; then
+              echo "✅ Build finished!"
+              break
+            elif [[ "$status" == "ERRORED" || "$status" == "CANCELED" ]]; then
+              echo "❌ Build failed with status: $status"
+              exit 1
+            fi
+
+            echo "⏳ Still building... waiting 30 seconds"
+            sleep 30
+          done
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
@@ -54,7 +71,7 @@ jobs:
       - name: Download APK artifact and rename
         id: download
         run: |
-          url=$(eas build:view --build-id ${{ steps.extract-id.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
+          url=$(eas build:view ${{ steps.extract-id.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
           filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
           curl -L "$url" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
