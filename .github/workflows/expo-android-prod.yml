@@ -1,5 +1,5 @@
 # This workflow builds a production Android APK using Expo when a Git tag like v1.2.0 is pushed.
-# 
+#
 # HOW TO USE:
 # 1. Make sure your code is pushed to main:
 #      git checkout main
