@@ -1,0 +1,81 @@
+# This workflow builds a production Android APK using Expo when a Git tag like v1.2.0 is pushed.
+#
+# HOW TO USE:
+# 1. Make sure your code is pushed to main:
+#      git checkout main
+#      git pull origin main
+#
+# 2. Create a SemVer Git tag (replace v1.2.0 with your version):
+#      git tag v1.2.0
+#
+# 3. Push the tag to trigger this workflow:
+#      git push origin v1.2.0
+#
+# This will:
+# - Build the APK using the production EAS profile
+# - Rename the file to cosmos-v1.2.0.apk
+# - Create a GitHub Release with that APK attached
+
+name: Expo Android Production (SemVer)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers only on version tags like v1.0.0, v2.3.1
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: current
+
+      - name: Install Expo & EAS CLI
+        run: npm install -g expo-cli eas-cli
+
+      - name: Authenticate with Expo
+        run: eas login --token ${{ secrets.EXPO_TOKEN }}
+
+      - name: Start Android build (production profile)
+        id: eas-build
+        run: |
+          build_info=$(eas build --platform android --profile production --non-interactive --json)
+          build_id=$(echo $build_info | jq -r '.builds.android.buildId')
+          echo "build_id=$build_id" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Wait for build to complete
+        run: |
+          eas build:wait --build-id ${{ steps.eas-build.outputs.build_id }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Download APK artifact and rename
+        id: download
+        run: |
+          url=$(eas build:view --build-id ${{ steps.eas-build.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
+          filename="cosmos-${GITHUB_REF_NAME}.apk"
+          curl -L "$url" -o "$filename"
+          echo "apk=$filename" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get commit message
+        id: commit
+        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release with versioned APK
+        run: |
+          gh release create ${GITHUB_REF_NAME} \
+            --title "${GITHUB_REF_NAME}" \
+            --notes "${{ steps.commit.outputs.message }}" \
+            "${{ steps.download.outputs.apk }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

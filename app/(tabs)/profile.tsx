@@ -1,107 +1,111 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal } from "react-native"
-import auth from '@react-native-firebase/auth';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { getApp } from '@react-native-firebase/app';
+import { getAuth } from '@react-native-firebase/auth';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-export default function Profile(){
-    const user = auth().currentUser;
+export default function Profile() {
+    const [user, setUser] = useState<any>(null);
     const router = useRouter();
+
+    useEffect(() => {
+        const auth = getAuth(getApp());
+        setUser(auth.currentUser);
+    }, []);
 
     const signOut = async () => {
         try {
             await GoogleSignin.revokeAccess();
             await GoogleSignin.signOut();
-            await auth().signOut();
-            console.log('User signed out!');
-            router.navigate('/');
+
+            const auth = getAuth(getApp());
+            await auth.signOut();
+
+            router.replace('/');
         } catch (error) {
             console.error('Sign out error', error);
         }
-      };
+    };
 
-    return(
+    return (
         <View style={styles.container}>
-            <View style={styles.content}>
-                <Text>Welcome, {user?.displayName}</Text>
-                <Text>Email: {user?.email}</Text>
-                <TouchableOpacity onPress={signOut} style={styles.signOutButton}>
-                    <Text style={styles.buttonText}>Sign Out</Text>
+            <View style={styles.profileCard}>
+                <Image
+                    source={{ uri: user?.photoURL || 'https://via.placeholder.com/100' }}
+                    style={styles.avatar}
+                />
+                <Text style={styles.displayName}>{user?.displayName || 'User'}</Text>
+                <Text style={styles.email}>{user?.email}</Text>
+                <TouchableOpacity onPress={signOut} style={styles.signOutButton} activeOpacity={0.8}>
+                    <Text style={styles.signOutText}>Sair</Text>
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#FFF",
         flex: 1,
-        padding: 0,
-        margin: 0
+        backgroundColor: '#f2f4f8',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
     },
 
-    header: {
-        height: 120,
-        marginBottom: 30,
-        backgroundColor: "purple",
-        justifyContent: "flex-end",
-        paddingBottom: "5%",
-        paddingLeft: "3%"
-    },
-
-    title: {
-        fontSize: 23,
-        fontWeight: "bold",
-        color: "#FFF"
-    },
-
-    content: {
-        flex: 1,
-        backgroundColor: "#FFF",
-        padding: "2%",
-        margin: 0,
-    },
-
-    defaultContent: {
-        justifyContent: "center",
-        alignItems: "center",
-        flex: 1,
-    },
-
-    default: {
-        color: "gray",
-        width: 300,
-        textAlign: "center"
-    },
-
-    button: {
-        height: 50,
-        width: 50,
-        backgroundColor: "#b686f4",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 15,
-        position: "absolute",
-        right: 20,
-        bottom: 20,
-    },
-
-    buttonText: {
-        color: "#FFF",
-        fontSize: 20,
-        textAlign: "center",
-        textAlignVertical: "center",
-        lineHeight: 50,
-        elevation: 10,
+    profileCard: {
+        backgroundColor: '#fff',
+        width: '100%',
+        borderRadius: 20,
+        paddingVertical: 40,
+        paddingHorizontal: 30,
+        alignItems: 'center',
         shadowColor: "#000",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 15,
+        elevation: 10,
+    },
+
+    avatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginBottom: 20,
+        borderWidth: 2,
+        borderColor: '#4285F4',
+    },
+
+    displayName: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 6,
+    },
+
+    email: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 30,
     },
 
     signOutButton: {
         backgroundColor: '#4285F4',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 30,
+        shadowColor: "#4285F4",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 5,
     },
 
-
-})
+    signOutText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+});
