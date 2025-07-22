@@ -18,24 +18,22 @@ jobs:
         with:
           node-version: current
 
-      - name: Install Expo & EAS CLI
-        run: npm install -g expo-cli eas-cli
-
-      - name: Authenticate with Expo
-        run: eas whoami || eas login --token ${{ secrets.EXPO_TOKEN }}
-
-      - name: Start Android build (preview profile)
+      - name: Run EAS Build (preview profile)
         id: eas-build
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          command: eas build --platform android --profile preview --non-interactive --json
+
+      - name: Extract build ID
+        id: extract-id
         run: |
-          build_info=$(eas build --platform android --profile preview --non-interactive --json)
-          build_id=$(echo $build_info | jq -r '.builds.android.buildId')
-          echo "build_id=$build_id" >> $GITHUB_OUTPUT
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          echo "build_id=$(echo '${{ steps.eas-build.outputs.stdout }}' | jq -r '.builds.android.buildId')" >> $GITHUB_OUTPUT
 
       - name: Wait for build to complete
         run: |
-          eas build:wait --build-id ${{ steps.eas-build.outputs.build_id }}
+          eas build:wait --build-id ${{ steps.extract-id.outputs.build_id }}
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
@@ -56,7 +54,7 @@ jobs:
       - name: Download APK artifact and rename
         id: download
         run: |
-          url=$(eas build:view --build-id ${{ steps.eas-build.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
+          url=$(eas build:view --build-id ${{ steps.extract-id.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
           filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
           curl -L "$url" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
