@@ -45,7 +45,7 @@ export default function Home() {
                                 <Text style={{ color: "gray", padding: 6 }}>Atividades individuais</Text>
                                 <FlatList
                                     data={taskList}
-                                    keyExtractor={(item, index) => index.toString()}
+                                    keyExtractor={(item) => item.id}
                                     renderItem={({ item }) => <TaskItem removeItem={async () => {
                                         const tasks = await remove("1", item.id)
                                         setTaskList(tasks ?? [])

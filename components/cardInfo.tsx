@@ -28,7 +28,7 @@ export default function TaskInfo({data, closeView}:Props){
             </View>
 
             <Text style={styles.subtitle}>Descrição</Text>
-            <View style={styles.wrapper}>
+            <View style={styles.wrapperDesc}>
                 <Text>{data.desc}</Text>
             </View>
 
@@ -81,6 +81,14 @@ const styles = StyleSheet.create({
         padding: 5,
         borderRadius:4,
         borderColor: "purple"
+    },
+
+    wrapperDesc:{
+        borderWidth: 1,
+        padding: 5,
+        borderRadius:4,
+        borderColor: "purple",
+        height:100
     },
 
     subtitle:{

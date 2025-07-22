@@ -3,7 +3,6 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import { useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import useStorage from '@/data/Storage';
-
 type Props = {
     closeView: () => void;
 };
@@ -18,8 +17,6 @@ type Task = {
 }
 
 export default function CreateTask({ closeView }: Props) {
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let resultado=''
 
     const { save } = useStorage()
 
@@ -28,16 +25,13 @@ export default function CreateTask({ closeView }: Props) {
     const [showDate, setShowDate] = useState(false);
     const [showTime, setShowTime] = useState(false);
     // valores dos campos de texto
-    const [id, setId] = useState('')
+    const id = Date.now().toString()
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
     const [mat, setMat] = useState('');
     const [prof, setProf] = useState('');
 
     async function saveTask (): Promise<void>{
-        const valor = Math.floor(Math.random() *caracteres.length)
-        resultado+= caracteres.charAt(valor);
-        setId(resultado);
         const task:Task = {id,title,desc,mat,prof,date};
         await save("1", task);
         closeView();
@@ -72,6 +66,7 @@ export default function CreateTask({ closeView }: Props) {
                     <TextInput
                         style={styles.textInput}
                         placeholder='Digite o nome da tarefa'
+                        placeholderTextColor={"gray"}
                         value={title}
                         onChangeText={setTitle}
                     />
@@ -81,6 +76,7 @@ export default function CreateTask({ closeView }: Props) {
                     <TextInput
                         style={styles.textInputDescription}
                         placeholder='Digite a descrição da tarefa'
+                        placeholderTextColor={"gray"}
                         multiline
                         textAlignVertical='top'
                         value={desc}
@@ -93,6 +89,7 @@ export default function CreateTask({ closeView }: Props) {
                     <TextInput
                         style={styles.textInput}
                         placeholder='Digite o nome da matéria'
+                        placeholderTextColor={"gray"}
                         value={mat}
                         onChangeText={setMat}
                     />
@@ -103,6 +100,7 @@ export default function CreateTask({ closeView }: Props) {
                     <TextInput
                         style={styles.textInput}
                         placeholder='Digite o nome do Professor'
+                        placeholderTextColor={"gray"}
                         value={prof}
                         onChangeText={setProf}
                     />

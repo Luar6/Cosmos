@@ -1,18 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 type Props = {
     handleClose: () => void
 }
 
 export default function CreateAgenda({ handleClose }: Props) {
-
+    const user = auth().currentUser
     const [agendaName, setAgendaName] = useState('');
-    const [uidAdm, setUidAdm] = useState('');
+    const uidAdm = user?.uid
     const cadastrarAgenda = async () => {
         const nome = encodeURIComponent(agendaName);
-        const uid = encodeURIComponent(uidAdm);
+        const uid = encodeURIComponent(uidAdm ?? "");
         const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? "");
 
         const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda?nome_agenda=${nome}&uid_do_responsavel=${uid}&api_key=${chave}`;
@@ -48,6 +49,7 @@ export default function CreateAgenda({ handleClose }: Props) {
                     <TextInput
                         style={styles.textInput}
                         placeholder='Digite o nome da agenda'
+                        placeholderTextColor={"gray"}
                         value={agendaName}
                         onChangeText={setAgendaName}
                         accessibilityLabel="Nome da Agenda"
@@ -56,14 +58,7 @@ export default function CreateAgenda({ handleClose }: Props) {
                 </View>
                 <View>
                     <Text style={styles.titleInput}>ID</Text>
-                    <TextInput
-                        style={styles.textInput}
-                        placeholder='Digite o ID do responsável pela agenda'
-                        value={uidAdm}
-                        onChangeText={setUidAdm}
-                        accessibilityLabel="ID do Responsável"
-                        nativeID="uidAdmInput"
-                    />
+                    <Text style={styles.textInputUid}>{user?.uid}</Text>
                 </View>
             </View>
             <TouchableOpacity onPress={saveAndClose} style={styles.button}>
@@ -96,6 +91,19 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "rgba(96, 39, 170, 0.6)",
         borderRadius: 4
+    },
+
+    textInputUid:{
+        width: "99%",
+        height: 47,
+        paddingLeft: 15,
+        paddingRight: 15,
+        borderWidth: 1,
+        borderColor: "rgba(96, 39, 170, 0.6)",
+        borderRadius: 4,
+        justifyContent:"center",
+        color:"gray",
+        textAlignVertical:"center"
     },
 
     titleInput: {

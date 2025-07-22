@@ -27,6 +27,7 @@ const useStorage = () => {
             let tasks = await get(id)
             tasks.push(value)
             await AsyncStorage.setItem(id, JSON.stringify(tasks))
+            console.log("criado!")
         } catch (err) {
             alert("não foi possível inserir a tarefa: " + err)
         }
@@ -37,6 +38,7 @@ const useStorage = () => {
             let tasks = await get(id);
             let myTasks = tasks.filter((task) => task.id !== itemId);
             await AsyncStorage.setItem(id, JSON.stringify(myTasks));
+            console.log("removido!")
             return myTasks;
         } catch (err) {
             alert("não foi possível deletar a tarefa: " + err);
