@@ -1,4 +1,4 @@
-name: Expo Android Dev Build
+name: Expo Android Preview Build
 
 on:
   push:
@@ -24,10 +24,10 @@ jobs:
       - name: Authenticate with Expo
         run: eas whoami || eas login --token ${{ secrets.EXPO_TOKEN }}
 
-      - name: Start Android build (development profile)
+      - name: Start Android build (preview profile)
         id: eas-build
         run: |
-          build_info=$(eas build --platform android --profile development --non-interactive --json)
+          build_info=$(eas build --platform android --profile preview --non-interactive --json)
           build_id=$(echo $build_info | jq -r '.builds.android.buildId')
           echo "build_id=$build_id" >> $GITHUB_OUTPUT
         env:
