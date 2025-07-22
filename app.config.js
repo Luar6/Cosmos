@@ -61,6 +61,18 @@ export default {
         "projectId": "f432b8bf-66ae-40ea-8a27-4286b08b0468"
       }
     },
+    "build": {
+      "production": {
+        "android": {
+          "buildType": "apk"
+        }
+      },
+      "preview": {
+        "android": {
+          "buildType": "apk"
+        }
+      }
+    },
     "owner": "leandro212"
   }
 }
