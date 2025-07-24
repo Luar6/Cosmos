@@ -1,12 +1,14 @@
 name: Expo Android Preview Build
 
 on:
-  push:
-    branches-ignore:
-      - main
+  workflow_run:
+    workflows: ["Test Expo App"]
+    types:
+      - completed
 
 jobs:
   build-and-release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -18,39 +20,33 @@ jobs:
         with:
           node-version: current
 
-      - name: Run EAS Build (preview profile)
-        id: eas-build
+      - name: Set up Expo environment
         uses: expo/expo-github-action@v8
         with:
-          eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-          command: eas build --platform android --profile preview --non-interactive --json
+          eas-version: latest
+          eas-cache: true
+          expo-cache: true
+          packager: npm
+          patch-watchers: true
 
-      - name: Extract build ID
-        id: extract-id
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run EAS build and wait
+        id: eas-build
         run: |
-          echo "build_id=$(echo '${{ steps.eas-build.outputs.stdout }}' | jq -r '.builds.android.buildId')" >> $GITHUB_OUTPUT
+          eas build --platform android --profile preview --non-interactive --wait --json > result.json
 
-      - name: Wait for build to complete (polling)
-        run: |
-          build_id=${{ steps.extract-id.outputs.build_id }}
-          echo "Waiting for build $build_id to complete..."
+          build_url=$(jq -r '.[0].artifacts.buildUrl' result.json)
 
-          while true; do
-            status=$(eas build:view "$build_id" --json | jq -r '.status')
-            echo "Current status: $status"
+          if [ -z "$build_url" ] || [ "$build_url" = "null" ]; then
+            echo "❌ Build URL not found"
+            exit 1
+          fi
 
-            if [[ "$status" == "FINISHED" ]]; then
-              echo "✅ Build finished!"
-              break
-            elif [[ "$status" == "ERRORED" || "$status" == "CANCELED" ]]; then
-              echo "❌ Build failed with status: $status"
-              exit 1
-            fi
-
-            echo "⏳ Still building... waiting 30 seconds"
-            sleep 30
-          done
+          echo "✅ Build URL: $build_url"
+          echo "url=$build_url" >> $GITHUB_OUTPUT
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
@@ -71,23 +67,28 @@ jobs:
       - name: Download APK artifact and rename
         id: download
         run: |
-          url=$(eas build:view ${{ steps.extract-id.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
           filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
-          curl -L "$url" -o "$filename"
+          echo "Downloading from: ${{ steps.eas-build.outputs.url }}"
+          curl -L "${{ steps.eas-build.outputs.url }}" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Get commit message
+      - name: Get commit message and SHA
         id: commit
-        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+        run: |
+          message=$(git log -1 --pretty=%B)
+          sha=$(git rev-parse HEAD)
+          url="https://github.com/${{ github.repository }}/commit/$sha"
+          echo "message=$message" >> $GITHUB_OUTPUT
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "url=$url" >> $GITHUB_OUTPUT
 
       - name: Create GitHub pre-release with renamed APK
         run: |
+          notes="- [${{ steps.commit.outputs.message }}](${{ steps.commit.outputs.url }})"
           gh release create ${{ steps.tag.outputs.tag }} \
             --prerelease \
             --title "${{ steps.tag.outputs.tag }}" \
-            --notes "${{ steps.commit.outputs.message }}" \
+            --notes "$notes" \
             "${{ steps.download.outputs.apk }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
