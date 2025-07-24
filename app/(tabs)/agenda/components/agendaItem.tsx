@@ -1,4 +1,4 @@
-import {Text, View, StyleSheet } from 'react-native'
+import {Text, View, StyleSheet, TouchableOpacity} from 'react-native'
 
 type Props={
     data: {
@@ -8,16 +8,35 @@ type Props={
 }
 export default function AgendaItem({data}: Props){
     return(
-        <View style={styles.container}>
-            <Text>{data.nome_agenda}</Text>
-            
-        </View>
+        <TouchableOpacity style={styles.container}>
+            <Text style={styles.data}>{data.nome_agenda}</Text>
+        </TouchableOpacity>
     )
 }
 
 const styles = StyleSheet.create({
     container:{
-        width: "99%",
-        backgroundColor: "gray"
+        height: 100,
+        width: "90%",
+        justifyContent: "flex-start",
+        backgroundColor: "purple",
+        marginVertical:"5%",
+        borderRadius: 18,
+
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 40 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+
+        elevation: 20,
+        marginHorizontal: "5%"
+    },
+    data:{
+        marginLeft: 20,
+        marginTop: 20,
+        fontSize: 20,
+        color:"#FFF",
+        fontWeight: "500"
+        
     }
 })

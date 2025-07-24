@@ -141,7 +141,13 @@ export default function CreateTask({ closeView }: Props) {
                 </View>
             </View>
 
-            <TouchableOpacity onPress={saveTask} style={styles.button}>
+            <TouchableOpacity onPress={()=>{
+                if(title || desc || mat || prof == ""){
+                    alert('Ponha todas as informações');
+                }else{
+                    saveTask();
+                }
+            }} style={styles.button}>
                 <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"}/>
                 <Text style={styles.buttonText}>Criar</Text>
             </TouchableOpacity>

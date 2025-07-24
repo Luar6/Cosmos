@@ -62,7 +62,14 @@ export default function CreateAgenda({ handleClose }: Props) {
                     <Text style={styles.textInputUid}>{user?.uid}</Text>
                 </View>
             </View>
-            <TouchableOpacity onPress={saveAndClose} style={styles.button}>
+            <TouchableOpacity onPress={()=>{
+                if (agendaName == ""){
+                    alert('Ponha um nome para a agenda!')
+                }
+                else{
+                    saveAndClose()
+                }
+            }} style={styles.button}>
                 <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"} />
                 <Text style={styles.buttonText}>Confirmar</Text>
             </TouchableOpacity>

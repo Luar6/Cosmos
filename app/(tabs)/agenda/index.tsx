@@ -41,11 +41,11 @@ export default function Agenda() {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
+            <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
                 <View style={styles.content}>
                     {
                         agendas && agendas.length > 0 ? (
-                            <View>
+                            <View style={styles.schedules}>
                                 <FlatList
                                     data={agendas}
                                     keyExtractor={(item, index) => index.toString()}
@@ -83,34 +83,12 @@ const styles = StyleSheet.create({
         margin: 0
     },
 
-    header: {
-        height: 120,
-        marginBottom: 30,
-        backgroundColor: "purple",
-        justifyContent: "flex-end",
-        paddingBottom: "5%",
-        paddingLeft: "3%"
-    },
-
-    title: {
-        fontSize: 23,
-        fontWeight: "bold",
-        color: "#FFF"
-    },
-
     content: {
         flex: 1,
-        backgroundColor: "#gray",
+        backgroundColor: "#FFF",
         justifyContent:"center",
         alignItems:"center",
-        padding: "2%",
         margin: 0,
-    },
-
-    defaultContent: {
-        justifyContent: "center",
-        alignItems: "center",
-        flex: 1,
     },
 
     default: {
@@ -135,5 +113,10 @@ const styles = StyleSheet.create({
     btnCreateTxt:{
         color:"#FFF",
         fontWeight:"bold"
+    },
+    schedules:{
+        flex: 1,
+        width:"100%",
+        margin:0,
     }
 })
