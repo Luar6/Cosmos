@@ -2,8 +2,10 @@ name: Expo Android Production (SemVer)
 
 on:
   push:
+    branches:
+      - main
     tags:
-      - 'v*.*.*'  # Triggers only on version tags like v1.0.0, v2.3.1
+      - 'v*.*.*'  # Only on version tags like v1.0.0, v2.3.1
 
 jobs:
   build-and-release:
@@ -18,44 +20,60 @@ jobs:
         with:
           node-version: current
 
-      - name: Run EAS Build (production profile)
-        id: eas-build
+      - name: Set up Expo environment
         uses: expo/expo-github-action@v8
         with:
-          eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-          command: eas build --platform android --profile production --non-interactive --json
+          eas-version: latest
+          eas-cache: true
+          expo-cache: true
+          packager: npm
+          patch-watchers: true
 
-      - name: Extract build ID
-        id: extract-id
-        run: |
-          echo "build_id=$(echo '${{ steps.eas-build.outputs.stdout }}' | jq -r '.builds.android.buildId')" >> $GITHUB_OUTPUT
+      - name: Install dependencies
+        run: npm install
 
-      - name: Wait for build to complete
+      - name: Run EAS build and wait
+        id: eas-build
         run: |
-          eas build:wait --build-id ${{ steps.extract-id.outputs.build_id }}
+          eas build --platform android --profile production --non-interactive --wait --json > result.json
+
+          build_url=$(jq -r '.[0].artifacts.buildUrl' result.json)
+
+          if [ -z "$build_url" ] || [ "$build_url" = "null" ]; then
+            echo "❌ Build URL not found"
+            exit 1
+          fi
+
+          echo "✅ Build URL: $build_url"
+          echo "url=$build_url" >> $GITHUB_OUTPUT
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Download APK artifact and rename
         id: download
         run: |
-          url=$(eas build:view --build-id ${{ steps.extract-id.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
           filename="cosmos-${GITHUB_REF_NAME}.apk"
-          curl -L "$url" -o "$filename"
+          echo "Downloading from: ${{ steps.eas-build.outputs.url }}"
+          curl -L "${{ steps.eas-build.outputs.url }}" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Get commit message
+      - name: Get commit message and SHA
         id: commit
-        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+        run: |
+          message=$(git log -1 --pretty=%B)
+          sha=$(git rev-parse HEAD)
+          url="https://github.com/${{ github.repository }}/commit/$sha"
+          echo "message=$message" >> $GITHUB_OUTPUT
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "url=$url" >> $GITHUB_OUTPUT
 
       - name: Create GitHub release with versioned APK
         run: |
+          notes="- [${{ steps.commit.outputs.message }}](${{ steps.commit.outputs.url }})"
           gh release create ${GITHUB_REF_NAME} \
             --title "${GITHUB_REF_NAME}" \
-            --notes "${{ steps.commit.outputs.message }}" \
+            --notes "$notes" \
             "${{ steps.download.outputs.apk }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
