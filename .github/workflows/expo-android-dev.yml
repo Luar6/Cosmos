@@ -18,41 +18,19 @@ jobs:
         with:
           node-version: current
 
-      - name: Run EAS Build (preview profile)
+      - name: Run EAS Build and wait for completion
         id: eas-build
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-          command: eas build --platform android --profile preview --non-interactive --json
+          command: eas build --platform android --profile preview --non-interactive --wait --json
 
-      - name: Extract build ID
-        id: extract-id
+      - name: Extract build artifact URL
+        id: extract-url
         run: |
-          echo "build_id=$(echo '${{ steps.eas-build.outputs.stdout }}' | jq -r '.builds.android.buildId')" >> $GITHUB_OUTPUT
-
-      - name: Wait for build to complete (polling)
-        run: |
-          build_id=${{ steps.extract-id.outputs.build_id }}
-          echo "Waiting for build $build_id to complete..."
-
-          while true; do
-            status=$(eas build:view "$build_id" --json | jq -r '.status')
-            echo "Current status: $status"
-
-            if [[ "$status" == "FINISHED" ]]; then
-              echo "✅ Build finished!"
-              break
-            elif [[ "$status" == "ERRORED" || "$status" == "CANCELED" ]]; then
-              echo "❌ Build failed with status: $status"
-              exit 1
-            fi
-
-            echo "⏳ Still building... waiting 30 seconds"
-            sleep 30
-          done
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          build_url=$(echo '${{ steps.eas-build.outputs.stdout }}' | grep -o '"buildUrl":"[^"]*' | cut -d'"' -f4)
+          echo "url=$build_url" >> $GITHUB_OUTPUT
 
       - name: Get next tag
         id: tag
@@ -71,12 +49,9 @@ jobs:
       - name: Download APK artifact and rename
         id: download
         run: |
-          url=$(eas build:view ${{ steps.extract-id.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
           filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
-          curl -L "$url" -o "$filename"
+          curl -L "${{ steps.extract-url.outputs.url }}" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Get commit message
         id: commit
