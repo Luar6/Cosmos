@@ -64,7 +64,7 @@ export default function Home() {
                     <Text style={styles.buttonText}>+</Text>
                 </TouchableOpacity>
 
-                <Modal visible={task} animationType="fade">
+                <Modal visible={task} animationType="slide">
                     <CreateTask closeView={() => {
                         setViewTask(false);
                         load();

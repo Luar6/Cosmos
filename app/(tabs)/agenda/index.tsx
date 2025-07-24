@@ -9,7 +9,7 @@ import { useIsFocused } from "@react-navigation/native";
 
 type Agendas = {
     nome_agenda: string
-    uid_do_responsável: string
+    user_Id: string
     chave_de_convite: string
 }
 
@@ -21,20 +21,18 @@ export default function Agenda() {
 
     useEffect(()=>{
         if (!focused) return;
-
         fetch(url)
             .then(response=>{
                 if(!response.ok){
+                    console.log(url)
                     throw new Error("erro ao realizar a requisição");
-                }
-                else{
-                    return response.json();
-                }
+                }     
+                return response.json();        
             })
             .then(data=>{
                 console.log("Fetched data:", data);
-                setAgendas(data);
-                console.log("req done!")
+                const arrayAgenda = Object.values(data) as Agendas[];
+                setAgendas(arrayAgenda)
             })
             .catch(err=>{
                 console.log("Erro na requisição: "+ err)
@@ -65,7 +63,7 @@ export default function Agenda() {
                     }
                 </View>
 
-                <Modal animationType="fade" visible={visibleCreateGroup}>
+                <Modal animationType="slide" visible={visibleCreateGroup}>
                     <CreateAgenda handleClose={()=> setVisibleCreate(false)}/>
                 </Modal>
 
@@ -102,7 +100,7 @@ const styles = StyleSheet.create({
 
     content: {
         flex: 1,
-        backgroundColor: "#FFF",
+        backgroundColor: "#gray",
         justifyContent:"center",
         alignItems:"center",
         padding: "2%",

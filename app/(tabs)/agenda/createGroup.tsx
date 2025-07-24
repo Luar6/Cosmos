@@ -32,6 +32,7 @@ export default function CreateAgenda({ handleClose }: Props) {
 
     function saveAndClose(){
         cadastrarAgenda();
+        console.log("schedule created!")
         handleClose();
     }
 
