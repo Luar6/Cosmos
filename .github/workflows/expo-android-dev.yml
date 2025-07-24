@@ -25,10 +25,13 @@ jobs:
           eas-version: latest
           eas-cache: true
           expo-cache: true
-          packager: yarn
+          packager: npm
           patch-watchers: true
 
-      - name: Run EAS build with wait
+      - name: Install dependencies (npm)
+        run: npm install
+
+      - name: Run EAS build and wait
         id: eas-build
         run: |
           eas build --platform android --profile preview --non-interactive --wait --json > result.json
