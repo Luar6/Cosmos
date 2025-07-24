@@ -28,14 +28,22 @@ jobs:
           packager: npm
           patch-watchers: true
 
-      - name: Install dependencies (npm)
+      - name: Install dependencies
         run: npm install
 
       - name: Run EAS build and wait
         id: eas-build
         run: |
           eas build --platform android --profile preview --non-interactive --wait --json > result.json
-          build_url=$(grep -o '"buildUrl":"[^"]*' result.json | cut -d'"' -f4)
+
+          build_url=$(jq -r '.[0].artifacts.buildUrl' result.json)
+
+          if [ -z "$build_url" ] || [ "$build_url" = "null" ]; then
+            echo "❌ Build URL not found"
+            exit 1
+          fi
+
+          echo "✅ Build URL: $build_url"
           echo "url=$build_url" >> $GITHUB_OUTPUT
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -58,6 +66,7 @@ jobs:
         id: download
         run: |
           filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
+          echo "Downloading from: ${{ steps.eas-build.outputs.url }}"
           curl -L "${{ steps.eas-build.outputs.url }}" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
 
