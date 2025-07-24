@@ -1,0 +1,61 @@
+name: Expo Android Production (SemVer)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers only on version tags like v1.0.0, v2.3.1
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: current
+
+      - name: Run EAS Build (production profile)
+        id: eas-build
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          command: eas build --platform android --profile production --non-interactive --json
+
+      - name: Extract build ID
+        id: extract-id
+        run: |
+          echo "build_id=$(echo '${{ steps.eas-build.outputs.stdout }}' | jq -r '.builds.android.buildId')" >> $GITHUB_OUTPUT
+
+      - name: Wait for build to complete
+        run: |
+          eas build:wait --build-id ${{ steps.extract-id.outputs.build_id }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Download APK artifact and rename
+        id: download
+        run: |
+          url=$(eas build:view --build-id ${{ steps.extract-id.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
+          filename="cosmos-${GITHUB_REF_NAME}.apk"
+          curl -L "$url" -o "$filename"
+          echo "apk=$filename" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get commit message
+        id: commit
+        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release with versioned APK
+        run: |
+          gh release create ${GITHUB_REF_NAME} \
+            --title "${GITHUB_REF_NAME}" \
+            --notes "${{ steps.commit.outputs.message }}" \
+            "${{ steps.download.outputs.apk }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

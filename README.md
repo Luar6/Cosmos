@@ -3,7 +3,6 @@
 
 Um aplicativo de agenda escolar que viza em facilitar a rotina de estudos de um estudante. O aplicativo tem o objetivo de criar grupos de determinadas disciplinas para facilitar as divulgações de matériais, calendário para marcar atividades à e serem feitas, com um designer simples e intuitivo para que os estudantes tenham um fácil acesso
 
-<!-- - [Funcionamento](#Funcionamento) -->
 - [Equipe](#Equipe)
 - [Tecnologias](#Tecnologias)
 - [Instalação](#Instalação)
