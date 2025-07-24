@@ -18,19 +18,24 @@ jobs:
         with:
           node-version: current
 
-      - name: Run EAS Build and wait for completion
-        id: eas-build
+      - name: Set up Expo environment
         uses: expo/expo-github-action@v8
         with:
-          eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-          command: eas build --platform android --profile preview --non-interactive --wait --json
+          eas-version: latest
+          eas-cache: true
+          expo-cache: true
+          packager: yarn
+          patch-watchers: true
 
-      - name: Extract build artifact URL
-        id: extract-url
+      - name: Run EAS build with wait
+        id: eas-build
         run: |
-          build_url=$(echo '${{ steps.eas-build.outputs.stdout }}' | grep -o '"buildUrl":"[^"]*' | cut -d'"' -f4)
+          eas build --platform android --profile preview --non-interactive --wait --json > result.json
+          build_url=$(grep -o '"buildUrl":"[^"]*' result.json | cut -d'"' -f4)
           echo "url=$build_url" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Get next tag
         id: tag
@@ -50,7 +55,7 @@ jobs:
         id: download
         run: |
           filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
-          curl -L "${{ steps.extract-url.outputs.url }}" -o "$filename"
+          curl -L "${{ steps.eas-build.outputs.url }}" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
 
       - name: Get commit message
