@@ -1,11 +1,11 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: 'blue', headerShown: false }}>
+    <Tabs screenOptions={{ tabBarActiveTintColor: '#4285F4', headerShown: false }}>
       <Tabs.Screen
-        name="home"
+        name="home/index"
         options={{
           title: 'Início',
           tabBarIcon: ({ color }) => <Ionicons size={28} name="home" color={color} />,
@@ -28,7 +28,6 @@ export default function TabLayout() {
       <Tabs.Screen name="groups" options={{ href: null }} />
       <Tabs.Screen name="home/taskPage" options={{ href: null }} />
       <Tabs.Screen name="agenda/createGroup" options={{ href: null }} />
-      <Tabs.Screen name="agenda/components/agendaItem" options={{ href: null }} />
     </Tabs>
   );
 }
