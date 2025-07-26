@@ -1,17 +1,14 @@
-name: Expo Android Production (SemVer)
+name: Expo Android Production Build
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - 'v*.*.*'  # Only on version tags like v1.0.0, v2.3.1
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  Build-and-Release:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +20,12 @@ jobs:
         with:
           node-version: current
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Expo Doctor
+        run: npx expo-doctor
+
       - name: Set up Expo environment
         uses: expo/expo-github-action@v8
         with:
@@ -33,10 +36,7 @@ jobs:
           packager: npm
           patch-watchers: true
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run EAS build and wait
+      - name: Run EAS build (production) and wait
         id: eas-build
         run: |
           eas build --platform android --profile production --non-interactive --wait --json > result.json
@@ -53,10 +53,16 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Extract app version and set tag
+        id: version
+        run: |
+          version=$(jq -r '.[0].appVersion' result.json)
+          echo "tag=v$version" >> $GITHUB_OUTPUT
+
       - name: Download APK artifact and rename
         id: download
         run: |
-          filename="cosmos-${GITHUB_REF_NAME}.apk"
+          filename="cosmos-${{ steps.version.outputs.tag }}.apk"
           echo "Downloading from: ${{ steps.eas-build.outputs.url }}"
           curl -L "${{ steps.eas-build.outputs.url }}" -o "$filename"
           echo "apk=$filename" >> $GITHUB_OUTPUT
@@ -67,21 +73,28 @@ jobs:
           message=$(git log -1 --pretty=%B)
           sha=$(git rev-parse HEAD)
           url="https://github.com/${{ github.repository }}/commit/$sha"
-      
+
           {
             echo "message<<EOF"
             echo "$message"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
-      
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "url=$url" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub release with versioned APK
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "url=$url" >> $GITHUB_OUTPUT
+
+      - name: Tag commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ steps.version.outputs.tag }}
+          git push origin ${{ steps.version.outputs.tag }}
+
+      - name: Create GitHub Release with renamed APK
         run: |
           notes="- [${{ steps.commit.outputs.message }}](${{ steps.commit.outputs.url }})"
-          gh release create ${GITHUB_REF_NAME} \
-            --title "${GITHUB_REF_NAME}" \
+          gh release create ${{ steps.version.outputs.tag }} \
+            --title "${{ steps.version.outputs.tag }}" \
             --notes "$notes" \
             "${{ steps.download.outputs.apk }}"
         env:
