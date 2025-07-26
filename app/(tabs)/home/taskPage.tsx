@@ -142,7 +142,7 @@ export default function CreateTask({ closeView }: Props) {
             </View>
 
             <TouchableOpacity onPress={()=>{
-                if(title || desc || mat || prof == ""){
+                if(title === "" || desc === "" || mat === "" || prof === ""){
                     alert('Ponha todas as informações');
                 }else{
                     saveTask();

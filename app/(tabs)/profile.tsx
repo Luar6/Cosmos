@@ -1,19 +1,28 @@
-import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { getApp } from '@react-native-firebase/app';
+import { getAuth } from '@react-native-firebase/auth';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 export default function Profile() {
-    const user = auth().currentUser;
+    const [user, setUser] = useState<any>(null);
     const router = useRouter();
-    
+
+    useEffect(() => {
+        const auth = getAuth(getApp());
+        setUser(auth.currentUser);
+    }, []);
+
     const signOut = async () => {
         try {
             await GoogleSignin.revokeAccess();
             await GoogleSignin.signOut();
-            await auth().signOut();
-            console.log('User signed out!');
-            router.navigate('/');
+
+            const auth = getAuth(getApp());
+            await auth.signOut();
+
+            router.replace('/');
         } catch (error) {
             console.error('Sign out error', error);
         }
@@ -39,12 +48,11 @@ export default function Profile() {
                 </TouchableOpacity>
             </View>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#FFF",
         flex: 1,
         padding: 0,
         margin: 0,

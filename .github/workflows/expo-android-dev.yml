@@ -1,0 +1,107 @@
+name: Expo Android Preview Build
+
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  contents: write
+
+jobs:
+  Build-and-Release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: current
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Expo Doctor
+        run: npx expo-doctor
+
+      - name: Set up Expo environment
+        uses: expo/expo-github-action@v8
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          eas-version: latest
+          eas-cache: true
+          expo-cache: true
+          packager: npm
+          patch-watchers: true
+
+      - name: Run EAS build and wait
+        id: eas-build
+        run: |
+          eas build --platform android --profile preview --non-interactive --wait --json > result.json
+
+          build_url=$(jq -r '.[0].artifacts.buildUrl' result.json)
+
+          if [ -z "$build_url" ] || [ "$build_url" = "null" ]; then
+            echo "❌ Build URL not found"
+            exit 1
+          fi
+
+          echo "✅ Build URL: $build_url"
+          echo "url=$build_url" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Get next tag
+        id: tag
+        run: |
+          latest_tag=$(gh release list --limit 100 | grep '^r[0-9]' | awk '{print $1}' | sort -Vr | head -n 1)
+          if [[ -z "$latest_tag" ]]; then
+            next_tag="r1"
+          else
+            number=${latest_tag#r}
+            next_tag="r$((number + 1))"
+          fi
+          echo "tag=$next_tag" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download APK artifact and rename
+        id: download
+        run: |
+          filename="cosmos-${{ steps.tag.outputs.tag }}.apk"
+          echo "Downloading from: ${{ steps.eas-build.outputs.url }}"
+          curl -L "${{ steps.eas-build.outputs.url }}" -o "$filename"
+          echo "apk=$filename" >> $GITHUB_OUTPUT
+
+      - name: Get commit message and SHA
+        id: commit
+        run: |
+          full_message=$(git log -1 --pretty=%B)
+      
+          clean_message=$(echo "$full_message" | sed '/^Merge pull request/d' | sed '/^$/d' | head -n 1)
+      
+          sha=$(git rev-parse HEAD)
+          url="https://github.com/${{ github.repository }}/commit/$sha"
+      
+          {
+            echo "message<<EOF"
+            echo "$clean_message"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub pre-release with renamed APK
+        run: |
+          notes="- [${{ steps.commit.outputs.message }}](${{ steps.commit.outputs.url }})"
+          gh release create ${{ steps.tag.outputs.tag }} \
+            --target ${{ steps.commit.outputs.sha }} \
+            --prerelease \
+            --title "${{ steps.tag.outputs.tag }}" \
+            --notes "$notes" \
+            "${{ steps.download.outputs.apk }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

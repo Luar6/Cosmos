@@ -5,7 +5,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { FlatList, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AgendaItem from './components/agendaItem';
+import AgendaItem from '@/components/agendaItem';
 import CreateAgenda from "./createGroup";
 
 type Agendas = {
@@ -150,4 +150,6 @@ const styles = StyleSheet.create({
         flex: 1,
         width: "100%",
     },
+
 });
+

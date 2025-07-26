@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TaskItem from "@/components/modal";
-import CreateTask from './home/taskPage';
+import CreateTask from './taskPage';
 
 type Task = {
     id: string
@@ -24,7 +24,10 @@ export default function Home() {
 
     async function load() {
         const tasks = await get("1")
-        setTaskList(tasks)
+        if(tasks){
+            const sortedTasks = tasks.sort((a,b)=> new Date(a.date).getTime() - new Date(b.date).getTime())
+            setTaskList(sortedTasks)
+        }
     }
 
     useEffect(() => {
@@ -37,12 +40,11 @@ export default function Home() {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
+            <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', ]}>
                 <View style={styles.content}>
                     {
                         taskList && taskList.length > 0 ? (
                             <View>
-                                <Text style={{ color: "gray", padding: 6 }}>Atividades individuais</Text>
                                 <FlatList
                                     data={taskList}
                                     keyExtractor={(item) => item.id}
