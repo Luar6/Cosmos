@@ -1,22 +1,28 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { getApp } from '@react-native-firebase/app';
+import { getAuth } from '@react-native-firebase/auth';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import auth from '@react-native-firebase/auth';
 
 type Props = {
-    handleClose: () => void
+    handleClose: () => void;
+    onCreated: () => void;
 }
 
-export default function CreateAgenda({ handleClose }: Props) {
-    const user = auth().currentUser
+export default function CreateAgenda({ handleClose, onCreated }: Props) {
+    const [userUid, setUserUid] = useState<string | null>(null);
+
+    useEffect(() => {
+        const auth = getAuth(getApp());
+        setUserUid(auth.currentUser?.uid ?? null);
+    }, []);
+
     const [agendaName, setAgendaName] = useState('');
-    const uidAdm = user?.uid
     const cadastrarAgenda = async () => {
         const nome = encodeURIComponent(agendaName);
-        const uid = encodeURIComponent(uidAdm ?? "");
         const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? "");
 
-        const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda?nome_agenda=${nome}&uid_do_responsavel=${uid}&api_key=${chave}`;
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda?nome_agenda=${nome}&uid_do_responsavel=${userUid}&api_key=${chave}`;
 
         try {
             const response = await fetch(url, {
@@ -25,15 +31,21 @@ export default function CreateAgenda({ handleClose }: Props) {
 
             const json = await response.json();
             console.log("Resposta da API:", json);
+            return json;
         } catch (error) {
             console.log("Erro ao cadastrar:", error);
+            throw error;
         }
     };
 
-    function saveAndClose(){
-        cadastrarAgenda();
-        console.log("schedule created!")
-        handleClose();
+    async function saveAndClose() {
+        try {
+            await cadastrarAgenda();
+            onCreated();
+            handleClose();
+        } catch (error) {
+            throw error
+        }
     }
 
     return (
@@ -57,16 +69,12 @@ export default function CreateAgenda({ handleClose }: Props) {
                         nativeID="agendaNameInput"
                     />
                 </View>
-                <View>
-                    <Text style={styles.titleInput}>ID</Text>
-                    <Text style={styles.textInputUid}>{user?.uid}</Text>
-                </View>
             </View>
-            <TouchableOpacity onPress={()=>{
-                if (agendaName == ""){
+            <TouchableOpacity onPress={() => {
+                if (agendaName == "") {
                     alert('Ponha um nome para a agenda!')
                 }
-                else{
+                else {
                     saveAndClose()
                 }
             }} style={styles.button}>
@@ -101,7 +109,7 @@ const styles = StyleSheet.create({
         borderRadius: 4
     },
 
-    textInputUid:{
+    textInputUid: {
         width: "99%",
         height: 47,
         paddingLeft: 15,
@@ -109,9 +117,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "rgba(96, 39, 170, 0.6)",
         borderRadius: 4,
-        justifyContent:"center",
-        color:"gray",
-        textAlignVertical:"center"
+        justifyContent: "center",
+        color: "gray",
+        textAlignVertical: "center"
     },
 
     titleInput: {
