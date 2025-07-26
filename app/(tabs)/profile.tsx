@@ -4,7 +4,6 @@ import { getAuth } from '@react-native-firebase/auth';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { useRouter } from 'expo-router';
 
 export default function Profile() {
     const [user, setUser] = useState<any>(null);

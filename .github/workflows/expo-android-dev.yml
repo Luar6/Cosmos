@@ -1,14 +1,11 @@
 name: Expo Android Preview Build
 
 on:
-  workflow_run:
-    workflows: ["Test Expo App"]
-    types:
-      - completed
+  push:
+    branches: [dev]
 
 jobs:
-  build-and-release:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  Build-and-Release:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +17,12 @@ jobs:
         with:
           node-version: current
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Expo Doctor
+        run: npx expo-doctor
+
       - name: Set up Expo environment
         uses: expo/expo-github-action@v8
         with:
@@ -29,9 +32,6 @@ jobs:
           expo-cache: true
           packager: npm
           patch-watchers: true
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Run EAS build and wait
         id: eas-build
