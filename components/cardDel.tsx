@@ -16,10 +16,12 @@ type Props={
 }
 
 export default function TaskDel({data, closeView, delItem}:Props){
+    
     function finalRemove(){
         delItem()
         closeView()
     }
+
     return(
       <View style={styles.container}>
         <View style={styles.content}>

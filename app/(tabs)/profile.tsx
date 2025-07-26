@@ -4,6 +4,7 @@ import { getAuth } from '@react-native-firebase/auth';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { useRouter } from 'expo-router';
 
 export default function Profile() {
     const [user, setUser] = useState<any>(null);
@@ -30,15 +31,21 @@ export default function Profile() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.profileCard}>
-                <Image
-                    source={{ uri: user?.photoURL || 'https://via.placeholder.com/100' }}
-                    style={styles.avatar}
-                />
-                <Text style={styles.displayName}>{user?.displayName || 'User'}</Text>
-                <Text style={styles.email}>{user?.email}</Text>
-                <TouchableOpacity onPress={signOut} style={styles.signOutButton} activeOpacity={0.8}>
-                    <Text style={styles.signOutText}>Sair</Text>
+            <View style={styles.content}>
+                <View style={styles.data}>
+                    {user?.photoURL ? (
+                        <Image
+                            source={{ uri: user.photoURL }}
+                            style={{ width: 120, height: 120, borderRadius: 60 }}
+                        />
+                    ) : (
+                        <Text>Sem foto</Text>
+                    )}
+                    <Text>{user?.displayName}</Text>
+                    <Text>{user?.email}</Text>
+                </View>
+                <TouchableOpacity onPress={signOut} style={styles.signOutButton}>
+                    <Text style={styles.buttonText}>Sair</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -48,64 +55,50 @@ export default function Profile() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f2f4f8',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 20,
+        padding: 0,
+        margin: 0,
+        alignItems: "center",
+        justifyContent: "center"
     },
 
-    profileCard: {
-        backgroundColor: '#fff',
-        width: '100%',
-        borderRadius: 20,
-        paddingVertical: 40,
-        paddingHorizontal: 30,
-        alignItems: 'center',
+    content: {
+        height: "50%",
+        width: "80%",
+        justifyContent: "center",
+        backgroundColor: "#FFF",
+        padding: "10%",
+        margin: 0,
+        borderRadius: 18,
+
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
-        shadowRadius: 15,
+        shadowOffset: { width: 0, height: 40 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+
+        elevation: 15
+    },
+
+    data: {
+        paddingBottom: 30,
+        gap: 10,
+        alignItems:"center"
+    },
+
+    buttonText: {
+        color: "#FFF",
+        fontSize: 17,
+        textAlign: "center",
+        textAlignVertical: "center",
+        lineHeight: 50,
         elevation: 10,
-    },
-
-    avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        marginBottom: 20,
-        borderWidth: 2,
-        borderColor: '#4285F4',
-    },
-
-    displayName: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: '#333',
-        marginBottom: 6,
-    },
-
-    email: {
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 30,
+        shadowColor: "#000",
     },
 
     signOutButton: {
         backgroundColor: '#4285F4',
-        paddingVertical: 14,
-        paddingHorizontal: 40,
-        borderRadius: 30,
-        shadowColor: "#4285F4",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-        elevation: 5,
+        paddingVertical: 4,
+        paddingHorizontal: 15,
+        borderRadius: 8,
     },
 
-    signOutText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-});
+})

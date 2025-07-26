@@ -20,7 +20,7 @@ export default function App() {
     const subscriber = onAuthStateChanged(getAuth(), (user) => {
       setUser(user);
       if (initializing) setInitializing(false);
-      if (user) router.replace('/(tabs)/home');
+      if (user) router.replace('./(tabs)/home');
     });
     return subscriber;
   }, []);

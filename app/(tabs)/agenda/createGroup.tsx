@@ -62,6 +62,7 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
                     <TextInput
                         style={styles.textInput}
                         placeholder='Digite o nome da agenda'
+                        placeholderTextColor={"gray"}
                         value={agendaName}
                         onChangeText={setAgendaName}
                         accessibilityLabel="Nome da Agenda"
@@ -69,7 +70,14 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
                     />
                 </View>
             </View>
-            <TouchableOpacity onPress={saveAndClose} style={styles.button}>
+            <TouchableOpacity onPress={()=>{
+                if (agendaName == ""){
+                    alert('Ponha um nome para a agenda!')
+                }
+                else{
+                    saveAndClose()
+                }
+            }} style={styles.button}>
                 <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"} />
                 <Text style={styles.buttonText}>Confirmar</Text>
             </TouchableOpacity>
@@ -99,6 +107,19 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "rgba(96, 39, 170, 0.6)",
         borderRadius: 4
+    },
+
+    textInputUid:{
+        width: "99%",
+        height: 47,
+        paddingLeft: 15,
+        paddingRight: 15,
+        borderWidth: 1,
+        borderColor: "rgba(96, 39, 170, 0.6)",
+        borderRadius: 4,
+        justifyContent:"center",
+        color:"gray",
+        textAlignVertical:"center"
     },
 
     titleInput: {
