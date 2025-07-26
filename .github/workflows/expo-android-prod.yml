@@ -64,9 +64,15 @@ jobs:
           message=$(git log -1 --pretty=%B)
           sha=$(git rev-parse HEAD)
           url="https://github.com/${{ github.repository }}/commit/$sha"
-          echo "message=$message" >> $GITHUB_OUTPUT
-          echo "sha=$sha" >> $GITHUB_OUTPUT
-          echo "url=$url" >> $GITHUB_OUTPUT
+      
+          {
+            echo "message<<EOF"
+            echo "$message"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release with versioned APK
         run: |
