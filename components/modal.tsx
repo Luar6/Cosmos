@@ -30,19 +30,20 @@ export default function TaskItem({ data, removeItem }: Props) {
     function turnDelVisible() {
         setDelView(true);
     }
-//()=>{removeItem(data.id)}
+    //()=>{removeItem(data.id)}
     return (
-        <View style={styles.content}>
+        <View style={styles.container}>
             <TouchableOpacity onPress={turnInfoVisible} style={styles.button}>
-                <Text style={styles.text}>{data.title}</Text>
-
-                <TouchableOpacity style={{ justifyContent: "center", height: "100%" }} onPress={turnDelVisible}>
-                    <Ionicons size={18} color={"white"} name={"trash-bin-outline"} />
-                </TouchableOpacity>
+                <View style={styles.content}>
+                    <Text style={styles.text}>{data.title}</Text>
+                    <TouchableOpacity style={{ alignItems: "center", height: "100%" }} onPress={turnDelVisible}>
+                        <Ionicons size={25} color={"white"} name={"trash-bin-outline"} />
+                    </TouchableOpacity>
+                </View>
             </TouchableOpacity>
 
             <Modal animationType="fade" transparent={true} visible={delView}>
-                <TaskDel delItem={()=>{removeItem(data.id)}} data={data} closeView={() => setDelView(false)} />
+                <TaskDel delItem={() => { removeItem(data.id) }} data={data} closeView={() => setDelView(false)} />
             </Modal>
 
             <Modal animationType="fade" transparent={true} visible={infoView}>
@@ -53,23 +54,37 @@ export default function TaskItem({ data, removeItem }: Props) {
 }
 
 const styles = StyleSheet.create({
-    content: {
-        width: "100%"
+    container: {
+        width: "97%",
     },
-
+    content: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
     button: {
+        width: "100%",
         margin: 5,
-        height: 50,
-        backgroundColor: "#005eff",
+        height: 80,
+        backgroundColor: "purple",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: 10,
-        borderRadius: 5,
-        flexDirection: "row"
+        paddingHorizontal: 30,
+        borderRadius: 15,
+        flexDirection: "row",
+
+        borderWidth: 1,
+        borderColor: 'purple',
+        shadowColor: '#9900ffff',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 3
     },
 
     text: {
         color: "#FFF",
-        fontWeight: "bold"
+        fontWeight: "bold",
+        fontSize: 20
     },
 })

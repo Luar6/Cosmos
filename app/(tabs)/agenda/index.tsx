@@ -1,12 +1,12 @@
-import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import AgendaItem from "@/components/agendaItem";
-import CreateAgenda from "./createGroup";
-import { useIsFocused } from "@react-navigation/native";
 import { getApp } from '@react-native-firebase/app';
 import { getAuth } from '@react-native-firebase/auth';
+import { useIsFocused } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
+import { FlatList, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AgendaItem from '@/components/agendaItem';
+import CreateAgenda from "./createGroup";
 
 type Agendas = {
     nome_agenda: string
@@ -150,4 +150,6 @@ const styles = StyleSheet.create({
         flex: 1,
         width: "100%",
     },
+
 });
+

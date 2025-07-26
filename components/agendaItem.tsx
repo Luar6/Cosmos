@@ -1,5 +1,5 @@
-import { Text, View, StyleSheet } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Props = {
   data: {
@@ -12,11 +12,13 @@ type Props = {
 export default function AgendaItem({ data }: Props) {
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
-        <Ionicons name="code-slash" size={24} color="#00FFFF" />
-        <Text style={styles.title}>{data.nome_agenda}</Text>
-      </View>
-      <Text style={styles.subtitle}>Convite: {data.chave_de_convite}</Text>
+      <TouchableOpacity>
+        <View style={styles.header}>
+          <Ionicons name="book-outline" size={24} color="#d57cf0ff" />
+          <Text style={styles.title}>{data.nome_agenda}</Text>
+        </View>
+        <Text style={styles.subtitle}>Convite: {data.chave_de_convite}</Text>
+      </TouchableOpacity>
     </View>
   );
 }

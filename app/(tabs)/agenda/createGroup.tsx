@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { getApp } from '@react-native-firebase/app';
 import { getAuth } from '@react-native-firebase/auth';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type Props = {
     handleClose: () => void;
@@ -29,24 +29,24 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
             method: "POST",
           });
 
-          const json = await response.json();
-          console.log("Resposta da API:", json);
-          return json;
+            const json = await response.json();
+            console.log("Resposta da API:", json);
+            return json;
         } catch (error) {
-          console.log("Erro ao cadastrar:", error);
-          throw error;
+            console.log("Erro ao cadastrar:", error);
+            throw error;
         }
     };
 
     async function saveAndClose() {
         try {
-          await cadastrarAgenda();
-          onCreated();
-          handleClose();
+            await cadastrarAgenda();
+            onCreated();
+            handleClose();
         } catch (error) {
             throw error
         }
-      }
+    }
 
     return (
         <View style={styles.container}>
@@ -70,11 +70,11 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
                     />
                 </View>
             </View>
-            <TouchableOpacity onPress={()=>{
-                if (agendaName == ""){
+            <TouchableOpacity onPress={() => {
+                if (agendaName == "") {
                     alert('Ponha um nome para a agenda!')
                 }
-                else{
+                else {
                     saveAndClose()
                 }
             }} style={styles.button}>
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
         borderRadius: 4
     },
 
-    textInputUid:{
+    textInputUid: {
         width: "99%",
         height: 47,
         paddingLeft: 15,
@@ -117,9 +117,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "rgba(96, 39, 170, 0.6)",
         borderRadius: 4,
-        justifyContent:"center",
-        color:"gray",
-        textAlignVertical:"center"
+        justifyContent: "center",
+        color: "gray",
+        textAlignVertical: "center"
     },
 
     titleInput: {
