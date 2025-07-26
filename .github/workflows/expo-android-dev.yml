@@ -78,13 +78,16 @@ jobs:
       - name: Get commit message and SHA
         id: commit
         run: |
-          message=$(git log -1 --pretty=%B)
+          full_message=$(git log -1 --pretty=%B)
+      
+          clean_message=$(echo "$full_message" | sed '/^Merge pull request/d' | sed '/^$/d' | head -n 1)
+      
           sha=$(git rev-parse HEAD)
           url="https://github.com/${{ github.repository }}/commit/$sha"
       
           {
             echo "message<<EOF"
-            echo "$message"
+            echo "$clean_message"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
       
@@ -95,6 +98,7 @@ jobs:
         run: |
           notes="- [${{ steps.commit.outputs.message }}](${{ steps.commit.outputs.url }})"
           gh release create ${{ steps.tag.outputs.tag }} \
+            --target ${{ steps.commit.outputs.sha }} \
             --prerelease \
             --title "${{ steps.tag.outputs.tag }}" \
             --notes "$notes" \
