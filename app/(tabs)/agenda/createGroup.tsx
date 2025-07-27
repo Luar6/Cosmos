@@ -19,7 +19,7 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
         const auth = getAuth(getApp());
         setUserUid(auth.currentUser?.uid ?? null);
     }, []);
-
+  
     const cadastrarAgenda = async () => {
         const nome = encodeURIComponent(agendaName);
         const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? "");
@@ -27,9 +27,9 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
         const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda?nome_agenda=${nome}&uid_do_responsavel=${userUid}&api_key=${chave}`;
 
         try {
-          const response = await fetch(url, {
-            method: "POST",
-          });
+            const response = await fetch(url, {
+                method: "POST",
+            });
 
             const json = await response.json();
             console.log("Resposta da API:", json);

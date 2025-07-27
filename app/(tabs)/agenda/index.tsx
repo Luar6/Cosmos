@@ -10,6 +10,7 @@ import CreateAgenda from "./createGroup";
 import { FAB, ActivityIndicator } from 'react-native-paper';
 
 type Agendas = {
+    uid_da_agenda: string
     nome_agenda: string
     chave_de_convite: string
     firstCreated: string

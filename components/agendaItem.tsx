@@ -1,10 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
+import { ViewAgenda } from "@/app/(tabs)/agenda/agendaView";
 
 type Props = {
   data: {
-    id: string;
+    id: string,
+    uid_da_agenda: string
     nome_agenda: string;
     chave_de_convite: string;
     firstCreated: string;
@@ -13,16 +16,21 @@ type Props = {
 
 export default function AgendaItem({ data }: Props) {
   const { colors } = useTheme();
+  const [viewAgenda, setVisibleViewAgenda] = useState(false);
 
   return (
     <View style={styles.card}>
-      <TouchableOpacity onPress={() => {console.log("Pressed agenda id:", data.id);}}>
+      <TouchableOpacity onPress={()=> setVisibleViewAgenda(true)}>
         <View style={styles.header}>
           <Ionicons name="book-outline" size={24} color={colors.primary} />
           <Text style={styles.title}>{data.nome_agenda}</Text>
         </View>
         <Text style={styles.subtitle}>Convite: {data.chave_de_convite}</Text>
       </TouchableOpacity>
+
+      <Modal animationType={'fade'} visible={viewAgenda}> 
+        <ViewAgenda handleClose={() => setVisibleViewAgenda(false)} data={data}/>
+      </Modal>
     </View>
   );
 }
