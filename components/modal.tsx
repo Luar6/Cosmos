@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
 
         borderWidth: 1,
         borderColor: 'purple',
-        shadowColor: '#9900ffff',
+        shadowColor: '#57038fff',
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.3,
         shadowRadius: 4,

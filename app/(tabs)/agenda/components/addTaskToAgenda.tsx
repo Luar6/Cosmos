@@ -1,51 +1,47 @@
 import { Ionicons } from '@expo/vector-icons';
-import { getApp } from '@react-native-firebase/app';
-import { getAuth } from '@react-native-firebase/auth';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type Props = {
-    handleClose: () => void;
-    onCreated: () => void;
+    data: {
+        id: string
+        uid_da_agenda: string
+        nome_agenda: string;
+        chave_de_convite: string;
+        firstCreated: string;
+    };
+    handleClose: () => void
 }
 
-export default function CreateAgenda({ handleClose, onCreated }: Props) {
-    const [userUid, setUserUid] = useState<string | null>(null);
+export function AddTaskToAgenda({ handleClose, data }: Props) {
+    const [nameTask, setNameTask] = useState('');
 
-    useEffect(() => {
-        const auth = getAuth(getApp());
-        setUserUid(auth.currentUser?.uid ?? null);
-    }, []);
-
-    const [agendaName, setAgendaName] = useState('');
-    
-    const cadastrarAgenda = async () => {
-        const nome = encodeURIComponent(agendaName);
-        const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? "");
-
-        const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda?nome_agenda=${nome}&uid_do_responsavel=${userUid}&api_key=${chave}`;
+    const cadastrarAtividade = async () => {
+        const uid = encodeURIComponent(data.id);
+        const name = encodeURIComponent(nameTask);
+        const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? ' ');
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/add/agenda/tarefa?uid_da_agenda=${uid}&nome_da_tarefa=${name}&api_key=${chave}`;
 
         try {
             const response = await fetch(url, {
                 method: "POST",
             });
-
             const json = await response.json();
-            console.log("Resposta da API:", json);
-            return json;
+            console.log("resposta da api: ", json);
         } catch (error) {
-            console.log("Erro ao cadastrar:", error);
-            throw error;
+            console.log('erro ao cadastrar: ', error);
+            throw error
         }
-    };
+    }
 
     async function saveAndClose() {
-        try {
-            await cadastrarAgenda();
-            onCreated();
+        try{
+            await cadastrarAtividade();
+            console.log('atividade salva!')
             handleClose();
-        } catch (error) {
-            throw error
+        }catch(error){
+            console.log('erro ao salvar: ' + error);
+            throw error;
         }
     }
 
@@ -53,27 +49,27 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={handleClose}>
-                    <Ionicons size={30} color={"purple"} name={"arrow-back-outline"} />
+                    <Ionicons size={30} color={"purple"} name="arrow-back-outline" />
                 </TouchableOpacity>
-                <Text style={{ fontSize: 25 }}>Criar Agenda</Text>
+                <Text style={styles.pageTitle}>Criar Tarefa</Text>
             </View>
             <View style={{ gap: 20 }}>
                 <View>
                     <Text style={styles.titleInput}>Nome</Text>
                     <TextInput
                         style={styles.textInput}
-                        placeholder='Digite o nome da agenda'
+                        placeholder='Digite o nome da atividade'
                         placeholderTextColor={"gray"}
-                        value={agendaName}
-                        onChangeText={setAgendaName}
-                        accessibilityLabel="Nome da Agenda"
-                        nativeID="agendaNameInput"
+                        value={nameTask}
+                        onChangeText={setNameTask}
+                        accessibilityLabel="Nome da Atividade"
+                        nativeID="atividadeNameInput"
                     />
                 </View>
             </View>
             <TouchableOpacity onPress={() => {
-                if (agendaName == "") {
-                    alert('Ponha um nome para a agenda!')
+                if (nameTask == "") {
+                    alert('Ponha um nome para a atividade!')
                 }
                 else {
                     saveAndClose()
@@ -91,15 +87,16 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: "3%"
     },
-
     header: {
         flexDirection: 'row',
-        alignItems: "center",
+        alignItems: 'center',
         gap: 10,
         paddingBottom: 30,
         height: 80
     },
-
+    pageTitle: {
+        fontSize: 25
+    },
     textInput: {
         width: "99%",
         height: 47,
@@ -109,25 +106,10 @@ const styles = StyleSheet.create({
         borderColor: "rgba(96, 39, 170, 0.6)",
         borderRadius: 4
     },
-
-    textInputUid: {
-        width: "99%",
-        height: 47,
-        paddingLeft: 15,
-        paddingRight: 15,
-        borderWidth: 1,
-        borderColor: "rgba(96, 39, 170, 0.6)",
-        borderRadius: 4,
-        justifyContent: "center",
-        color: "gray",
-        textAlignVertical: "center"
-    },
-
     titleInput: {
         paddingLeft: 15,
         color: "rgba(96, 39, 170, 0.6)"
     },
-
     button: {
         height: 50,
         width: 130,
@@ -141,9 +123,8 @@ const styles = StyleSheet.create({
         right: 20,
         bottom: 20,
     },
-
     buttonText: {
         color: "#FFF",
-        fontSize: 17,
+        fontSize: 17
     }
 })
