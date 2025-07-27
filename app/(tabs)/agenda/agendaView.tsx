@@ -32,7 +32,7 @@ export function ViewAgenda({ data, handleClose }: Props) {
                 </Pressable>
 
                 <Modal animationType="slide" visible={configVisible}>
-                    <ConfigAgenda handleClose={() => setConfigVisible(false)} data={data} />
+                    <ConfigAgenda closeAll={handleClose} handleClose={() => setConfigVisible(false)} data={data} />
                 </Modal>
             </View>
             
