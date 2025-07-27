@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FAB, TextInput } from 'react-native-paper';
 import useStorage from '@/data/Storage';
 type Props = {
     closeView: () => void;
@@ -24,6 +25,7 @@ export default function CreateTask({ closeView }: Props) {
     const [date, setDate] = useState(new Date());
     const [showDate, setShowDate] = useState(false);
     const [showTime, setShowTime] = useState(false);
+    const [loading, setLoading] = useState(false);
     // valores dos campos de texto
     const id = Date.now().toString()
     const [title, setTitle] = useState('');
@@ -31,11 +33,21 @@ export default function CreateTask({ closeView }: Props) {
     const [mat, setMat] = useState('');
     const [prof, setProf] = useState('');
 
-    async function saveTask (): Promise<void>{
-        const task:Task = {id,title,desc,mat,prof,date};
-        await save("1", task);
-        closeView();
+    async function saveTask (): Promise<void> {
+        if (loading) return;
+
+        setLoading(true);
+        try {
+            const task: Task = { id, title, desc, mat, prof, date };
+            await save("1", task);
+            closeView();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     }
+
 
     const handleChangeDate = (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === 'set' && selectedDate) {
@@ -62,21 +74,22 @@ export default function CreateTask({ closeView }: Props) {
 
             <View style={styles.content}>
                 <View>
-                    <Text style={styles.tytleInput}>Nome</Text>
+                    <Text style={styles.titleInput}>Nome</Text>
                     <TextInput
-                        style={styles.textInput}
                         placeholder='Digite o nome da tarefa'
                         placeholderTextColor={"gray"}
+                        mode='outlined'
                         value={title}
                         onChangeText={setTitle}
                     />
                 </View>
                 <View>
-                    <Text style={styles.tytleInput}>Descrição</Text>
+                    <Text style={styles.titleInput}>Descrição</Text>
                     <TextInput
                         style={styles.textInputDescription}
                         placeholder='Digite a descrição da tarefa'
                         placeholderTextColor={"gray"}
+                        mode='outlined'
                         multiline
                         textAlignVertical='top'
                         value={desc}
@@ -85,36 +98,36 @@ export default function CreateTask({ closeView }: Props) {
                 </View>
 
                 <View>
-                    <Text style={styles.tytleInput}>Matéria</Text>
+                    <Text style={styles.titleInput}>Matéria</Text>
                     <TextInput
-                        style={styles.textInput}
                         placeholder='Digite o nome da matéria'
                         placeholderTextColor={"gray"}
+                        mode='outlined'
                         value={mat}
                         onChangeText={setMat}
                     />
                 </View>
 
                 <View>
-                    <Text style={styles.tytleInput}>Professor</Text>
+                    <Text style={styles.titleInput}>Professor</Text>
                     <TextInput
-                        style={styles.textInput}
                         placeholder='Digite o nome do Professor'
                         placeholderTextColor={"gray"}
+                        mode='outlined'
                         value={prof}
                         onChangeText={setProf}
                     />
                 </View>
 
                 <View style={styles.contentInputDate}>
-                    <Text style={styles.tytleInput}>Data</Text>
+                    <Text style={styles.titleInput}>Data</Text>
                     <TouchableOpacity
                         style={styles.dateBtn}
                         onPress={() => setShowDate(true)}>
                             <Text>{date.toLocaleDateString()}</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.tytleInput}>Hora</Text>
+                    <Text style={styles.titleInput}>Hora</Text>
                     <TouchableOpacity
                         style={styles.dateBtn}
                         onPress={() => setShowTime(true)}>
@@ -141,16 +154,22 @@ export default function CreateTask({ closeView }: Props) {
                 </View>
             </View>
 
-            <TouchableOpacity onPress={()=>{
-                if(title === "" || desc === "" || mat === "" || prof === ""){
-                    alert('Ponha todas as informações');
-                }else{
-                    saveTask();
-                }
-            }} style={styles.button}>
-                <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"}/>
-                <Text style={styles.buttonText}>Criar</Text>
-            </TouchableOpacity>
+            <FAB
+                icon="arrow-right"
+                label="Criar"
+                loading={loading}
+                disabled={loading}
+                style={styles.button}
+                onPress={() => {
+                    if (loading) return;
+                    if (title === "" || desc === "" || mat === "" || prof === "") {
+                        alert('Ponha todas as informações');
+                    } else {
+                        saveTask();
+                    }
+                }}
+            />
+
         </View>
 
     )
@@ -178,19 +197,13 @@ const styles = StyleSheet.create({
         fontSize: 25
     },
 
-    tytleInput: {
+    titleInput: {
         paddingLeft: 15,
         color: "rgba(96, 39, 170, 0.6)"
     },
 
     textInputDescription: {
-        width: "99%",
-        height: 117,
-        paddingLeft: 15,
-        paddingTop: 15,
-        borderWidth: 1,
-        borderColor: "rgba(96, 39, 170, 0.6)",
-        borderRadius: 4
+        height: 120,
     },
 
     textInput: {
@@ -217,17 +230,9 @@ const styles = StyleSheet.create({
     },
 
     button:{
-        height:50,
-        width:100,
-        gap: 10,
-        backgroundColor: "#b686f4",
-        flexDirection:"row",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 15,
-        position:"absolute",
-        right:20,
-        bottom: 20,
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
     },
 
     buttonText:{

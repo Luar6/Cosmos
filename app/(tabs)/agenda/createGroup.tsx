@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { getApp } from '@react-native-firebase/app';
 import { getAuth } from '@react-native-firebase/auth';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FAB, TextInput } from 'react-native-paper';
 
 type Props = {
     handleClose: () => void;
@@ -11,14 +12,14 @@ type Props = {
 
 export default function CreateAgenda({ handleClose, onCreated }: Props) {
     const [userUid, setUserUid] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [agendaName, setAgendaName] = useState('');
 
     useEffect(() => {
         const auth = getAuth(getApp());
         setUserUid(auth.currentUser?.uid ?? null);
     }, []);
-
-    const [agendaName, setAgendaName] = useState('');
-    
+  
     const cadastrarAgenda = async () => {
         const nome = encodeURIComponent(agendaName);
         const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? "");
@@ -40,12 +41,17 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
     };
 
     async function saveAndClose() {
+        if (loading) return; // Prevent double execution
+
+        setLoading(true);
         try {
             await cadastrarAgenda();
             onCreated();
             handleClose();
         } catch (error) {
-            throw error
+            console.error(error);
+        } finally {
+            setLoading(false); // Allow pressing again if needed
         }
     }
 
@@ -61,9 +67,9 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
                 <View>
                     <Text style={styles.titleInput}>Nome</Text>
                     <TextInput
-                        style={styles.textInput}
                         placeholder='Digite o nome da agenda'
                         placeholderTextColor={"gray"}
+                        mode='outlined'
                         value={agendaName}
                         onChangeText={setAgendaName}
                         accessibilityLabel="Nome da Agenda"
@@ -71,17 +77,21 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
                     />
                 </View>
             </View>
-            <TouchableOpacity onPress={() => {
-                if (agendaName == "") {
-                    alert('Ponha um nome para a agenda!')
-                }
-                else {
-                    saveAndClose()
-                }
-            }} style={styles.button}>
-                <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"} />
-                <Text style={styles.buttonText}>Confirmar</Text>
-            </TouchableOpacity>
+            <FAB
+                icon="arrow-right"
+                label="Confirmar"
+                onPress={() => {
+                    if (loading) return;
+                    if (agendaName === "") {
+                        alert("Ponha um nome para a agenda!");
+                    } else {
+                        saveAndClose();
+                    }
+                }}
+                loading={loading}
+                disabled={loading}
+                style={styles.button}
+            />
         </View>
     )
 }
@@ -129,17 +139,9 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        height: 50,
-        width: 130,
-        gap: 10,
-        backgroundColor: "#b686f4",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 15,
-        position: "absolute",
-        right: 20,
-        bottom: 20,
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
     },
 
     buttonText: {
