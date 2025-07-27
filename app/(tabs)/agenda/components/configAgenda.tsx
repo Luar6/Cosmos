@@ -1,32 +1,49 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
+import { useState } from 'react';
+import { ConfirmDel } from './confirmDelete';
 
 type Props = {
     data: {
         id: string
+        uid_da_agenda: string
         nome_agenda: string;
         chave_de_convite: string;
         firstCreated: string;
     };
     handleClose: () => void
+    closeAll: () => void
 }
 
-export function ConfigAgenda({ data, handleClose }: Props) {
-    const uid = encodeURIComponent(data.id);
-    const name = encodeURIComponent(data.nome_agenda);
-    const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? ' ')
-    const url= `${process.env.EXPO_PUBLIC_API_URL}/update/agenda?uid_da_agenda=${uid}&nome_agenda=${name}&api_key=${chave}`
-    useEffect(()=>{
-        fetch(url)
-            .then(response=>{
-                if(!response.ok){
-                    const errorText = response.text();
-                    throw new Error(`${response.status} - ${errorText}`);
-                }
-                return response.json();
-            })
-    });
+export function ConfigAgenda({ closeAll, data, handleClose }: Props) {
+    const [viewDel, setViewDel] = useState(false)
+    const deletarAgenda = async () => {
+        const uid = encodeURIComponent(data.id); // ou data.uid_da_agenda, conforme a API espera
+        const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? '');
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/delete/agenda?uid_da_agenda=${uid}&api_key=${chave}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`Erro: ${response.status} - ${text}`);
+            }
+
+            console.log("Agenda deletada com sucesso!");
+        } catch (error) {
+            console.log("Erro ao deletar a agenda:", error);
+        }
+    };
+
+
+    async function deleteAndClose() {
+        await deletarAgenda();
+        console.log('operação finalizada');
+        closeAll();
+    }
 
     return (
         <View style={styles.container}>
@@ -40,21 +57,24 @@ export function ConfigAgenda({ data, handleClose }: Props) {
                 <View style={styles.contentBorderTop}>
                     <Text style={styles.data}>{data.nome_agenda}</Text>
                     <Pressable>
-                        <Ionicons size={25} color="gray" name="pencil"/>
+                        <Ionicons size={25} color="gray" name="pencil" />
                     </Pressable>
                 </View>
                 <View style={styles.content}>
-                    <Text  style={styles.data}>{data.chave_de_convite}</Text>
+                    <Text style={styles.data}>{data.chave_de_convite}</Text>
                 </View>
                 <View style={styles.contentBorderBottom}>
                     <Text style={styles.data}>{data.firstCreated}</Text>
                 </View>
                 <View style={styles.commands}>
-                    <TouchableOpacity style={styles.delete}>
+                    <TouchableOpacity onPress={()=>setViewDel(true)} style={styles.delete}>
                         <Text style={styles.delText}>Deletar agenda</Text>
                         <Ionicons size={20} color="red" name='trash-outline' />
                     </TouchableOpacity>
                 </View>
+                <Modal animationType='fade' transparent={true} visible={viewDel}>
+                    <ConfirmDel data={data} handleClose={()=>setViewDel(false)} finalRemove={deleteAndClose}/>
+                </Modal>
             </View>
         </View>
     )
@@ -105,7 +125,7 @@ const styles = StyleSheet.create({
     },
     contentBorderTop: {
         flexDirection: "row",
-        justifyContent:"space-between",
+        justifyContent: "space-between",
         paddingHorizontal: 10,
         paddingVertical: 20,
         borderWidth: 1,
@@ -123,7 +143,7 @@ const styles = StyleSheet.create({
     },
     commands: {
         justifyContent: "flex-end",
-        marginHorizontal:15,
+        marginHorizontal: 15,
         marginVertical: 20
     },
     delete: {
@@ -133,7 +153,7 @@ const styles = StyleSheet.create({
 
     },
     delText: {
-        fontSize:18,
+        fontSize: 18,
         color: "red"
     }
 })
