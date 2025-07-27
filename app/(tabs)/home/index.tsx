@@ -6,6 +6,7 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TaskItem from "@/components/modal";
 import CreateTask from './taskPage';
+import { FAB } from 'react-native-paper';
 
 type Task = {
     id: string
@@ -62,8 +63,8 @@ export default function Home() {
                         )
                     }
                 </View>
-                <TouchableOpacity onPress={turnVisible} style={styles.button}>
-                    <Text style={styles.buttonText}>+</Text>
+                <TouchableOpacity style={styles.button}>
+                    <FAB icon="plus" onPress={turnVisible}/>
                 </TouchableOpacity>
 
                 <Modal visible={task} animationType="slide">

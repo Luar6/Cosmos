@@ -7,6 +7,7 @@ import { FlatList, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, Vi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AgendaItem from '@/components/agendaItem';
 import CreateAgenda from "./createGroup";
+import { FAB, ActivityIndicator } from 'react-native-paper';
 
 type Agendas = {
     nome_agenda: string
@@ -19,6 +20,7 @@ export default function Agenda() {
     const [agendas, setAgendas] = useState<Record<string, Agendas>>({});
     const [refreshing, setRefreshing] = useState(false);
     const [visibleCreateGroup, setVisibleCreate] = useState(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const focused = useIsFocused();
 
     useEffect(() => {
@@ -35,6 +37,8 @@ export default function Agenda() {
         const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllAgendasLinkedToUser?uid_do_responsavel=${userUid}&api_key=${process.env.EXPO_PUBLIC_API_KEY}`;
         console.log("Fetching agendas for UID:", userUid);
 
+        setLoading(true); // Start loading
+
         return fetch(url)
             .then(async response => {
                 if (!response.ok) {
@@ -50,7 +54,8 @@ export default function Agenda() {
             })
             .catch(err => {
                 console.log("Erro na requisição: " + err);
-            });
+            })
+            .finally(() => setLoading(false)); // End loading
     }, [userUid]);
 
     const onRefresh = useCallback(() => {
@@ -79,35 +84,37 @@ export default function Agenda() {
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
                 <View style={styles.content}>
-                    {Object.keys(agendas).length > 0 ? (
-                        <View style={styles.schedules}>
-                            <FlatList
-                                data={agendaArray}
-                                renderItem={({ item }) => (
-                                    <AgendaItem data={item} />
-                                )}
-                                keyExtractor={(item) => item.id}
-                                refreshControl={
-                                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                                }
-                            />
-                        </View>
-                    ) : (
-                        <View style={styles.default}>
-                            <Ionicons size={25} color={"gray"} name={"person-add"} />
-                            <Text style={styles.default}>
-                                Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
-                            </Text>
-                        </View>
-                    )}
+                {loading ? (
+                    <ActivityIndicator animating={true} size="large" />
+                ) : Object.keys(agendas).length > 0 ? (
+                    <View style={styles.schedules}>
+                        <FlatList
+                            data={agendaArray}
+                            renderItem={({ item }) => (
+                                <AgendaItem data={item} />
+                            )}
+                            keyExtractor={(item) => item.id}
+                            refreshControl={
+                                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                            }
+                        />
+                    </View>
+                ) : (
+                    <View style={styles.default}>
+                        <Ionicons size={25} color={"gray"} name={"person-add"} />
+                        <Text style={styles.default}>
+                            Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
+                        </Text>
+                    </View>
+                )}
                 </View>
 
                 <Modal animationType="slide" visible={visibleCreateGroup}>
                     <CreateAgenda handleClose={() => setVisibleCreate(false)} onCreated={onAgendaCreated} />
                 </Modal>
 
-                <TouchableOpacity onPress={() => setVisibleCreate(true)} style={styles.btnCreate}>
-                    <Text style={styles.btnCreateTxt}>Criar um Grupo</Text>
+                <TouchableOpacity style={styles.btnCreate}>
+                    <FAB icon="plus" label="Criar um grupo" onPress={() => setVisibleCreate(true)}/>
                 </TouchableOpacity>
             </SafeAreaView>
         </View>

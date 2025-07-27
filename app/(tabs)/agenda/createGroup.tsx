@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { getApp } from '@react-native-firebase/app';
 import { getAuth } from '@react-native-firebase/auth';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, BackHandler } from 'react-native';
+import { FAB } from 'react-native-paper';
 
 type Props = {
     handleClose: () => void;
@@ -15,6 +16,13 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
     useEffect(() => {
         const auth = getAuth(getApp());
         setUserUid(auth.currentUser?.uid ?? null);
+
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            handleClose();
+            return true; // prevent default behavior (like closing the app)
+        });
+
+        return () => backHandler.remove();
     }, []);
 
     const [agendaName, setAgendaName] = useState('');
@@ -78,8 +86,7 @@ export default function CreateAgenda({ handleClose, onCreated }: Props) {
                     saveAndClose()
                 }
             }} style={styles.button}>
-                <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"} />
-                <Text style={styles.buttonText}>Confirmar</Text>
+                <FAB icon="arrow-right" label="Confirmar"/>
             </TouchableOpacity>
         </View>
     )
