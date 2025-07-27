@@ -6,7 +6,7 @@ import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from "react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TaskItem from "@/components/modal";
 import CreateTask from './taskPage';
-import { FAB } from 'react-native-paper';
+import { FAB, useTheme } from 'react-native-paper';
 
 type Task = {
     id: string
@@ -22,6 +22,8 @@ export default function Home() {
     const [taskList, setTaskList] = useState<Task[]>([]);
     const { get, remove } = useStorage();
     const focused = useIsFocused();
+
+    const { colors } = useTheme();
 
     async function load() {
         const tasks = await get("1")
@@ -63,11 +65,20 @@ export default function Home() {
                         )
                     }
                 </View>
-                <TouchableOpacity style={styles.button}>
-                    <FAB icon="plus" onPress={turnVisible}/>
-                </TouchableOpacity>
+                <FAB
+                    icon="plus"
+                    onPress={turnVisible}
+                    style={styles.button}
+                />
 
-                <Modal visible={task} animationType="slide">
+                <Modal
+                    visible={task}
+                    animationType="slide"
+                    onRequestClose={() => {
+                        setViewTask(false);
+                        load();
+                    }}
+                >
                     <CreateTask closeView={() => {
                         setViewTask(false);
                         load();
@@ -121,15 +132,9 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        height: 50,
-        width: 50,
-        backgroundColor: "#b686f4",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 15,
-        position: "absolute",
-        right: 20,
-        bottom: 20,
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
     },
 
     buttonText: {

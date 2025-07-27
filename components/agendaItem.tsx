@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
 
 type Props = {
   data: {
+    id: string;
     nome_agenda: string;
     chave_de_convite: string;
     firstCreated: string;
@@ -10,11 +12,13 @@ type Props = {
 };
 
 export default function AgendaItem({ data }: Props) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.card}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => {console.log("Pressed agenda id:", data.id);}}>
         <View style={styles.header}>
-          <Ionicons name="book-outline" size={24} color="#d57cf0ff" />
+          <Ionicons name="book-outline" size={24} color={colors.primary} />
           <Text style={styles.title}>{data.nome_agenda}</Text>
         </View>
         <Text style={styles.subtitle}>Convite: {data.chave_de_convite}</Text>

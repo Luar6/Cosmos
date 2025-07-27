@@ -109,13 +109,16 @@ export default function Agenda() {
                 )}
                 </View>
 
-                <Modal animationType="slide" visible={visibleCreateGroup}>
+                <Modal animationType="slide" visible={visibleCreateGroup} onRequestClose={() => setVisibleCreate(false)}>
                     <CreateAgenda handleClose={() => setVisibleCreate(false)} onCreated={onAgendaCreated} />
                 </Modal>
 
-                <TouchableOpacity style={styles.btnCreate}>
-                    <FAB icon="plus" label="Criar um grupo" onPress={() => setVisibleCreate(true)}/>
-                </TouchableOpacity>
+                <FAB
+                    icon="plus"
+                    label="Criar um grupo"
+                    onPress={() => setVisibleCreate(true)}
+                    style={styles.btnCreate}
+                />
             </SafeAreaView>
         </View>
     );
@@ -139,15 +142,9 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     btnCreate: {
-        position: "absolute",
-        right: 20,
-        bottom: 20,
-        width: 150,
-        height: 50,
-        backgroundColor: "#b686f4",
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 15,
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
     },
     btnCreateTxt: {
         color: "#FFF",
