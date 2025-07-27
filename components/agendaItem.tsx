@@ -5,6 +5,8 @@ import { ViewAgenda } from "@/app/(tabs)/agenda/agendaView";
 
 type Props = {
   data: {
+    id: string,
+    uid_da_agenda: string
     nome_agenda: string;
     chave_de_convite: string;
     firstCreated: string;
@@ -24,7 +26,7 @@ export default function AgendaItem({ data }: Props) {
         <Text style={styles.subtitle}>Convite: {data.chave_de_convite}</Text>
       </TouchableOpacity>
 
-      <Modal visible={viewAgenda}> 
+      <Modal animationType={'fade'} visible={viewAgenda}> 
         <ViewAgenda handleClose={() => setVisibleViewAgenda(false)} data={data}/>
       </Modal>
     </View>
