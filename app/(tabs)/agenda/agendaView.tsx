@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AddTaskToAgenda } from './components/addTaskToAgenda';
-import { ConfigAgenda } from './components/configAgenda';
+import { AddTaskToAgenda } from '@/components/addTaskToAgenda';
+import { ConfigAgenda } from '@/components/configAgenda';
+import { FAB } from 'react-native-paper';
+
 type Props = {
     data: {
         id: string
@@ -15,8 +17,8 @@ type Props = {
     handleClose: () => void
 };
 
-export function ViewAgenda({ data, handleClose }: Props) {
-    
+export default function ViewAgenda({ data, handleClose }: Props) {
+
     const [configVisible, setConfigVisible] = useState(false);
     const [addTaskVisible, setAddTaskVisible] = useState(false);
 
@@ -35,14 +37,16 @@ export function ViewAgenda({ data, handleClose }: Props) {
                     <ConfigAgenda closeAll={handleClose} handleClose={() => setConfigVisible(false)} data={data} />
                 </Modal>
             </View>
-            
+
             <View style={{flex: 1}}>
-                <Modal animationType='slide' visible={addTaskVisible}>
+                <Modal animationType='slide' visible={addTaskVisible} onRequestClose={() => setAddTaskVisible(false)}>
                     <AddTaskToAgenda data={data} handleClose={() => setAddTaskVisible(false)} />
                 </Modal>
-                <TouchableOpacity onPress={()=> setAddTaskVisible(true)} style={styles.button}>
-                    <Text style={styles.buttonText}>+</Text>
-                </TouchableOpacity>
+                <FAB
+                    icon="plus"
+                    onPress={()=> setAddTaskVisible(true)}
+                    style={styles.button}
+                />
             </View>
 
         </SafeAreaView>
@@ -71,15 +75,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     button: {
-        position: "absolute",
-        right: 20,
-        bottom: 20,
-        height: 50,
-        width: 50,
-        backgroundColor: "#b686f4",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 15,
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
     },
     buttonText: {
         color: "#FFF",
