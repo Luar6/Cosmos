@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from 'react-native-paper';
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
-import { ViewAgenda } from "@/app/(tabs)/agenda/agendaView";
+import ViewAgenda from "@/app/(tabs)/agenda/agendaView";
 
 type Props = {
   data: {
@@ -28,7 +28,7 @@ export default function AgendaItem({ data }: Props) {
         <Text style={styles.subtitle}>Convite: {data.chave_de_convite}</Text>
       </TouchableOpacity>
 
-      <Modal animationType={'fade'} visible={viewAgenda}> 
+      <Modal animationType={'fade'} visible={viewAgenda} onRequestClose={() => setVisibleViewAgenda(false)}>
         <ViewAgenda handleClose={() => setVisibleViewAgenda(false)} data={data}/>
       </Modal>
     </View>

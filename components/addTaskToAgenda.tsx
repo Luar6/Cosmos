@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FAB, TextInput } from 'react-native-paper';
 
 type Props = {
     data: {
@@ -15,6 +16,7 @@ type Props = {
 
 export function AddTaskToAgenda({ handleClose, data }: Props) {
     const [nameTask, setNameTask] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const cadastrarAtividade = async () => {
         const uid = encodeURIComponent(data.id);
@@ -35,13 +37,17 @@ export function AddTaskToAgenda({ handleClose, data }: Props) {
     }
 
     async function saveAndClose() {
-        try{
+        if (loading) return;
+
+        setLoading(true);
+        try {
             await cadastrarAtividade();
             console.log('atividade salva!')
             handleClose();
-        }catch(error){
-            console.log('erro ao salvar: ' + error);
-            throw error;
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -57,9 +63,9 @@ export function AddTaskToAgenda({ handleClose, data }: Props) {
                 <View>
                     <Text style={styles.titleInput}>Nome</Text>
                     <TextInput
-                        style={styles.textInput}
                         placeholder='Digite o nome da atividade'
                         placeholderTextColor={"gray"}
+                        mode='outlined'
                         value={nameTask}
                         onChangeText={setNameTask}
                         accessibilityLabel="Nome da Atividade"
@@ -67,17 +73,21 @@ export function AddTaskToAgenda({ handleClose, data }: Props) {
                     />
                 </View>
             </View>
-            <TouchableOpacity onPress={() => {
-                if (nameTask == "") {
-                    alert('Ponha um nome para a atividade!')
-                }
-                else {
-                    saveAndClose()
-                }
-            }} style={styles.button}>
-                <Ionicons size={17} color={"#FFF"} name={"arrow-forward-outline"} />
-                <Text style={styles.buttonText}>Confirmar</Text>
-            </TouchableOpacity>
+            <FAB
+                icon="arrow-right"
+                label="Confirmar"
+                onPress={() => {
+                    if (nameTask == "") {
+                        alert('Ponha um nome para a atividade!')
+                    }
+                    else {
+                        saveAndClose()
+                    }
+                }}
+                loading={loading}
+                disabled={loading}
+                style={styles.button}
+            />
         </View>
     )
 }
@@ -111,17 +121,9 @@ const styles = StyleSheet.create({
         color: "rgba(96, 39, 170, 0.6)"
     },
     button: {
-        height: 50,
-        width: 130,
-        gap: 10,
-        backgroundColor: "#b686f4",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 15,
-        position: "absolute",
-        right: 20,
-        bottom: 20,
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
     },
     buttonText: {
         color: "#FFF",
