@@ -22,6 +22,7 @@ export default function Agenda() {
     const [refreshing, setRefreshing] = useState(false);
     const [visibleCreateGroup, setVisibleCreate] = useState(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [firstLoadDone, setFirstLoadDone] = useState(false);
     const focused = useIsFocused();
 
     useEffect(() => {
@@ -38,7 +39,7 @@ export default function Agenda() {
         const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllAgendasLinkedToUser?uid_do_responsavel=${userUid}&api_key=${process.env.EXPO_PUBLIC_API_KEY}`;
         console.log("Fetching agendas for UID:", userUid);
 
-        setLoading(true); // Start loading
+        setLoading(true);
 
         return fetch(url)
             .then(async response => {
@@ -56,21 +57,23 @@ export default function Agenda() {
             .catch(err => {
                 console.log("Erro na requisição: " + err);
             })
-            .finally(() => setLoading(false)); // End loading
+            .finally(() => setLoading(false));
     }, [userUid]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        fetchAgendas().finally(() => setRefreshing(false));
+        return fetchAgendas().finally(() => setRefreshing(false));
     }, [fetchAgendas]);
 
     useEffect(() => {
-        if (!focused) return;
+        if (!focused || firstLoadDone) return;
 
         if (!agendas || Object.keys(agendas).length === 0) {
-            onRefresh();
+            onRefresh().then(() => setFirstLoadDone(true));
+        } else {
+            setFirstLoadDone(true);
         }
-    }, [focused, agendas, onRefresh]);
+    }, [focused, agendas, onRefresh, firstLoadDone]);
 
     const agendaArray = Object.entries(agendas).map(([id, value]) => ({
         id,
@@ -85,29 +88,29 @@ export default function Agenda() {
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
                 <View style={styles.content}>
-                {loading ? (
-                    <ActivityIndicator animating={true} size="large" />
-                ) : Object.keys(agendas).length > 0 ? (
-                    <View style={styles.schedules}>
-                        <FlatList
-                            data={agendaArray}
-                            renderItem={({ item }) => (
-                                <AgendaItem data={item} />
-                            )}
-                            keyExtractor={(item) => item.id}
-                            refreshControl={
-                                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                            }
-                        />
-                    </View>
-                ) : (
-                    <View style={styles.default}>
-                        <Ionicons size={25} color={"gray"} name={"person-add"} />
-                        <Text style={styles.default}>
-                            Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
-                        </Text>
-                    </View>
-                )}
+                    {loading && !firstLoadDone ? (
+                        <ActivityIndicator animating={true} size="large" />
+                    ) : agendaArray.length > 0 ? (
+                        <View style={styles.schedules}>
+                            <FlatList
+                                data={agendaArray}
+                                renderItem={({ item }) => (
+                                    <AgendaItem data={item} />
+                                )}
+                                keyExtractor={(item) => item.id}
+                                refreshControl={
+                                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                                }
+                            />
+                        </View>
+                    ) : (
+                        <View style={styles.default}>
+                            <Ionicons size={25} color={"gray"} name={"person-add"} />
+                            <Text style={styles.default}>
+                                Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 <Modal animationType="slide" visible={visibleCreateGroup} onRequestClose={() => setVisibleCreate(false)}>
@@ -155,6 +158,4 @@ const styles = StyleSheet.create({
         flex: 1,
         width: "100%",
     },
-
 });
-

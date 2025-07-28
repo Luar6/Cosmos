@@ -28,9 +28,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Ionicons size={28} name="person-circle" color={color} />,
         }}
       />
-      <Tabs.Screen name="groups" options={{ href: null }} />
       <Tabs.Screen name="home/taskPage" options={{ href: null }} />
       <Tabs.Screen name="agenda/createGroup" options={{ href: null }} />
+      <Tabs.Screen name="agenda/agendaView" options={{ href: null }} />
     </Tabs>
   );
 }
