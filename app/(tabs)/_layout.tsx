@@ -1,9 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { useTheme } from 'react-native-paper';
 
 export default function TabLayout() {
+  const { colors } = useTheme();
+
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: '#4285F4', headerShown: false }}>
+    <Tabs screenOptions={{ tabBarActiveTintColor: colors.primary, headerShown: false }}>
       <Tabs.Screen
         name="home/index"
         options={{
