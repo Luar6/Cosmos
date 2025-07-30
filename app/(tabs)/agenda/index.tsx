@@ -1,13 +1,13 @@
+import AgendaItem from '@/components/agendaItem';
 import { Ionicons } from "@expo/vector-icons";
 import { getApp } from '@react-native-firebase/app';
 import { getAuth } from '@react-native-firebase/auth';
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Modal, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FAB } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AgendaItem from '@/components/agendaItem';
 import CreateAgenda from "./createGroup";
-import { FAB, ActivityIndicator } from 'react-native-paper';
 
 type Agendas = {
     uid_da_agenda: string
@@ -87,9 +87,10 @@ export default function Agenda() {
                 <View style={styles.content}>
                 {loading ? (
                     <ActivityIndicator animating={true} size="large" />
-                ) : Object.keys(agendas).length > 0 ? (
+                ) : (
                     <View style={styles.schedules}>
                         <FlatList
+                            contentContainerStyle={agendaArray.length === 0 && styles.schedulesEmpty}
                             data={agendaArray}
                             renderItem={({ item }) => (
                                 <AgendaItem data={item} />
@@ -98,14 +99,15 @@ export default function Agenda() {
                             refreshControl={
                                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                             }
+                            ListEmptyComponent={
+                                <View style={styles.defaultContainer}>
+                                    <Ionicons size={25} color={"gray"} name={"person-add"} />
+                                    <Text style={styles.defaultText}>
+                                        Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
+                                    </Text>
+                                </View>
+                            }
                         />
-                    </View>
-                ) : (
-                    <View style={styles.default}>
-                        <Ionicons size={25} color={"gray"} name={"person-add"} />
-                        <Text style={styles.default}>
-                            Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
-                        </Text>
                     </View>
                 )}
                 </View>
@@ -136,10 +138,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    default: {
+    defaultContainer: {
         alignItems: "center",
-        color: "gray",
         width: 300,
+        alignSelf: "center",
+    },
+    defaultText: {
+        color: "gray",
         textAlign: "center",
     },
     btnCreate: {
@@ -154,6 +159,11 @@ const styles = StyleSheet.create({
     schedules: {
         flex: 1,
         width: "100%",
+    },
+    schedulesEmpty: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
 });
