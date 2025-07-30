@@ -19,10 +19,9 @@ type Agendas = {
 export default function Agenda() {
     const [userUid, setUserUid] = useState<string | null>(null);
     const [agendas, setAgendas] = useState<Record<string, Agendas>>({});
-    const [refreshing, setRefreshing] = useState(false);
+    const [refreshing, setRefreshing] = useState(true);
     const [visibleCreateGroup, setVisibleCreate] = useState(false);
     const [loading, setLoading] = useState<boolean>(false);
-    const [firstLoadDone, setFirstLoadDone] = useState(false);
     const focused = useIsFocused();
 
     useEffect(() => {
@@ -39,7 +38,7 @@ export default function Agenda() {
         const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllAgendasLinkedToUser?uid_do_responsavel=${userUid}&api_key=${process.env.EXPO_PUBLIC_API_KEY}`;
         console.log("Fetching agendas for UID:", userUid);
 
-        setLoading(true);
+        setLoading(true); // Start loading
 
         return fetch(url)
             .then(async response => {
@@ -57,23 +56,21 @@ export default function Agenda() {
             .catch(err => {
                 console.log("Erro na requisição: " + err);
             })
-            .finally(() => setLoading(false));
+            .finally(() => setLoading(false)); // End loading
     }, [userUid]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        return fetchAgendas().finally(() => setRefreshing(false));
+        fetchAgendas().finally(() => setRefreshing(false));
     }, [fetchAgendas]);
 
     useEffect(() => {
-        if (!focused || firstLoadDone) return;
-
-        if (!agendas || Object.keys(agendas).length === 0) {
-            onRefresh().then(() => setFirstLoadDone(true));
-        } else {
-            setFirstLoadDone(true);
+        if (!focused) return
+        /*if ((!agendas || Object.keys(agendas).length === 0) && refreshing) {*/
+        if (refreshing) {
+            onRefresh();
         }
-    }, [focused, agendas, onRefresh, firstLoadDone]);
+    }, [focused, onRefresh]);
 
     const agendaArray = Object.entries(agendas).map(([id, value]) => ({
         id,
@@ -88,29 +85,29 @@ export default function Agenda() {
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
                 <View style={styles.content}>
-                    {loading && !firstLoadDone ? (
-                        <ActivityIndicator animating={true} size="large" />
-                    ) : agendaArray.length > 0 ? (
-                        <View style={styles.schedules}>
-                            <FlatList
-                                data={agendaArray}
-                                renderItem={({ item }) => (
-                                    <AgendaItem data={item} />
-                                )}
-                                keyExtractor={(item) => item.id}
-                                refreshControl={
-                                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                                }
-                            />
-                        </View>
-                    ) : (
-                        <View style={styles.default}>
-                            <Ionicons size={25} color={"gray"} name={"person-add"} />
-                            <Text style={styles.default}>
-                                Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
-                            </Text>
-                        </View>
-                    )}
+                {loading ? (
+                    <ActivityIndicator animating={true} size="large" />
+                ) : Object.keys(agendas).length > 0 ? (
+                    <View style={styles.schedules}>
+                        <FlatList
+                            data={agendaArray}
+                            renderItem={({ item }) => (
+                                <AgendaItem data={item} />
+                            )}
+                            keyExtractor={(item) => item.id}
+                            refreshControl={
+                                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                            }
+                        />
+                    </View>
+                ) : (
+                    <View style={styles.default}>
+                        <Ionicons size={25} color={"gray"} name={"person-add"} />
+                        <Text style={styles.default}>
+                            Você ainda não está em nenhuma agenda! Clique abaixo para criar uma e convidar seus colegas de classe.
+                        </Text>
+                    </View>
+                )}
                 </View>
 
                 <Modal animationType="slide" visible={visibleCreateGroup} onRequestClose={() => setVisibleCreate(false)}>
@@ -158,4 +155,5 @@ const styles = StyleSheet.create({
         flex: 1,
         width: "100%",
     },
+
 });
