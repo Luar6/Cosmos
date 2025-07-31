@@ -34,15 +34,17 @@ export function PublicTaskItem({ agendaData, data }: Props) {
     const { colors } = useTheme();
     const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? '');
 
+    console.log(`AgendaData: ${JSON.stringify(agendaData)}`)
+
     const deletarTask = async () => {
         try {
-            const url = `${process.env.EXPO_PUBLIC_API_URL}/delete/agenda/tarefa?uid_da_agenda=${agendaData.uid_da_agenda}&uid_da_tarefa=${data.id}&api_key=${chave}`
+            const url = `${process.env.EXPO_PUBLIC_API_URL}/delete/agenda/tarefa?uid_da_agenda=${agendaData.id}&uid_da_tarefa=${data.id}&api_key=${chave}`
             const response = await fetch(url, {
                 method: 'DELETE',
             });
             if (!response.ok) {
-                const text = await response.text();
-                console.log(`${response.status} - ${text}`);
+                const errorData = await response.json();
+                console.log(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
             }
             console.log('tarefa deletada!');
         } catch (err) {
