@@ -89,7 +89,7 @@ export default function ViewAgenda({ data, handleClose }: Props) {
             <FlatList
                 data={arrayAgendaTasks}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <PublicTaskItem data={item} />}
+                renderItem={({ item }) => <PublicTaskItem agendaData={data} data={item} />}
             />
 
             <View style={{ flex: 1 }}>

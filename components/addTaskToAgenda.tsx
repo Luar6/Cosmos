@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
         paddingRight: 15,
         borderWidth: 1,
         borderColor: "rgba(96, 39, 170, 0.6)",
+        backgroundColor: '#FFF',
         borderRadius: 4
     },
     titleInput: {
