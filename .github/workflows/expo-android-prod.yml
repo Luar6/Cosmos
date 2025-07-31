@@ -1,0 +1,98 @@
+name: Expo Android Production Build
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  Build-and-Release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: current
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Expo Doctor
+        run: npx expo-doctor
+
+      - name: Set up Expo environment
+        uses: expo/expo-github-action@v8
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          eas-version: latest
+          eas-cache: true
+          expo-cache: true
+          packager: npm
+          patch-watchers: true
+
+      - name: Run EAS build (production) and wait
+        id: eas-build
+        run: |
+          eas build --platform android --profile production --non-interactive --wait --json > result.json
+
+          build_url=$(jq -r '.[0].artifacts.buildUrl' result.json)
+
+          if [ -z "$build_url" ] || [ "$build_url" = "null" ]; then
+            echo "❌ Build URL not found"
+            exit 1
+          fi
+
+          echo "✅ Build URL: $build_url"
+          echo "url=$build_url" >> $GITHUB_OUTPUT
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Extract app version and set tag
+        id: version
+        run: |
+          version=$(jq -r '.[0].appVersion' result.json)
+          echo "tag=v$version" >> $GITHUB_OUTPUT
+
+      - name: Download APK artifact and rename
+        id: download
+        run: |
+          filename="cosmos-${{ steps.version.outputs.tag }}.apk"
+          echo "Downloading from: ${{ steps.eas-build.outputs.url }}"
+          curl -L "${{ steps.eas-build.outputs.url }}" -o "$filename"
+          echo "apk=$filename" >> $GITHUB_OUTPUT
+
+      - name: Get commit message and SHA
+        id: commit
+        run: |
+          full_message=$(git log -1 --pretty=%B)
+
+          clean_message=$(echo "$full_message" | sed '/^Merge pull request/d' | sed '/^$/d' | head -n 1)
+
+          sha=$(git rev-parse HEAD)
+          url="https://github.com/${{ github.repository }}/commit/$sha"
+
+          {
+            echo "message<<EOF"
+            echo "$clean_message"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          echo "url=$url" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release with renamed APK
+        run: |
+          notes="- [${{ steps.commit.outputs.message }}](${{ steps.commit.outputs.url }})"
+          gh release create ${{ steps.version.outputs.tag }} \
+            --target ${{ steps.commit.outputs.sha }} \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes "$notes" \
+            "${{ steps.download.outputs.apk }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
