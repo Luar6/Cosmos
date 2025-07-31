@@ -4,7 +4,7 @@ import { getAuth } from '@react-native-firebase/auth';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { useTheme } from 'react-native-paper';
+import { FAB, useTheme } from 'react-native-paper';
 
 export default function Profile() {
     const [user, setUser] = useState<any>(null);
@@ -45,9 +45,11 @@ export default function Profile() {
                     <Text>{user?.displayName}</Text>
                     <Text>{user?.email}</Text>
                 </View>
-                <TouchableOpacity onPress={signOut} style={[styles.signOutButton, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.buttonText}>Sair</Text>
-                </TouchableOpacity>
+                <FAB
+                    label="Sair"
+                    onPress={signOut}
+                    style={styles.signOutButton}
+                />
             </View>
         </View>
     );

@@ -6,7 +6,9 @@ import TaskInfo from './cardInfo';
 import TaskDel from "./cardDel";
 
 type Task = {
-    name_task:string 
+    id: string;
+    nome_da_tarefa: string;
+    timestamp: string;
 };
 
 type Props = {
@@ -18,6 +20,8 @@ export function PublicTaskItem({data}:Props) {
     const [delView, setDelView] = useState(false);
 
     const { colors } = useTheme();
+
+    console.log(`Data do componente publicAgendaItem: ${JSON.stringify(data)}`)
 
     return (
         <View style={styles.container}>
@@ -35,7 +39,7 @@ export function PublicTaskItem({data}:Props) {
             >
                 <View style={styles.row}>
                     <Text style={[styles.title, { color: colors.onPrimary }]}>
-                        {data.name_task}
+                        {data.nome_da_tarefa}
                     </Text>
 
                     <TouchableOpacity
@@ -43,6 +47,9 @@ export function PublicTaskItem({data}:Props) {
                         style={styles.iconWrapper}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
+                        {/*
+                            Adicionar a função de remover no ícone da lixeira dentro do publicAgendaitem
+                        */}
                         <Ionicons
                             name="trash-bin-outline"
                             size={22}
