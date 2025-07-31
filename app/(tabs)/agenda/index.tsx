@@ -8,7 +8,6 @@ import { FlatList, Modal, RefreshControl, StyleSheet, Text, View } from "react-n
 import { ActivityIndicator, FAB } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CreateAgenda from "./createGroup";
-import { FAB, ActivityIndicator } from 'react-native-paper';
 import { ComeToGroup } from "@/components/comeToGroup";
 
 type Agendas = {

@@ -19,8 +19,10 @@ type Props = {
 };
 
 type Task = {
-    name_task: string
-}
+    id: string;
+    nome_da_tarefa: string;
+    timestamp: string;
+};
 
 export default function ViewAgenda({ data, handleClose }: Props) {
 
@@ -31,22 +33,34 @@ export default function ViewAgenda({ data, handleClose }: Props) {
     const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? '');
 
     const loadTasks = async (): Promise<Task[]> => {
-        const url = `${process.env.EXPO_PUBLIC_API_URL}/docs/getAllTarefasFromOneAgenda?uid_da_agenda=${data.uid_da_agenda}&api_key=${chave}`
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllTarefasFromOneAgenda?uid_da_agenda=${data.id}&api_key=${chave}`;
 
         try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                const text = response.text();
-                console.log(`${response.status} - ${text}`);
-                return [];
-            }
-            const data: Task[] = await response.json()
-            return data;
-        } catch (err) {
-            console.log('erro ao puxar os dados', err);
+          const response = await fetch(url);
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.log(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
             return [];
+          }
+
+          const result = await response.json();
+          console.log("Raw API result:", result);
+
+          const tasksArray: Task[] = Object.entries(result)
+            .map(([id, value]: [string, any]) => ({
+              id,
+              ...value
+            }))
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+          console.log("Sorted tasks:", tasksArray);
+
+          return tasksArray;
+        } catch (err) {
+          console.log('Erro ao puxar os dados:', err);
+          return [];
         }
-    }
+    };
 
     useEffect(() => {
         async function useLoad() {
@@ -55,6 +69,8 @@ export default function ViewAgenda({ data, handleClose }: Props) {
         }
         useLoad();
     },[]);
+
+    console.log("arrayAgendaTasks state:", arrayAgendaTasks);
 
     return (
         <SafeAreaView style={styles.container} edges={['left', 'right']}>
@@ -72,19 +88,17 @@ export default function ViewAgenda({ data, handleClose }: Props) {
             </View>
             <FlatList
                 data={arrayAgendaTasks}
-                keyExtractor={(item)=> item.name_task.toString()}
-                renderItem={({ item }) => {
-                    return <PublicTaskItem data={item} />
-                }}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => <PublicTaskItem data={item} />}
             />
 
             <View style={{ flex: 1 }}>
                 <Modal animationType='slide' visible={addTaskVisible} onRequestClose={() => setAddTaskVisible(false)}>
-                    <AddTaskToAgenda 
-                        data={data} 
-                        handleClose={() =>{ 
+                    <AddTaskToAgenda
+                        data={data}
+                        handleClose={() =>{
                             setAddTaskVisible(false);
-                        }} 
+                        }}
                     />
                 </Modal>
 
