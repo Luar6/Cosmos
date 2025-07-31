@@ -60,10 +60,12 @@ export default function App() {
         <Text style={styles.textBtn}>Continuar com o Google</Text>
       </TouchableOpacity>
 
+      {/*
       <TouchableOpacity style={styles.darkBtn} onPress={handleGoogleSignIn}>
         <Ionicons name="person-outline" size={20} color="white" />
         <Text style={styles.darkTextBtn}>Continuar como Visitante</Text>
       </TouchableOpacity>
+      */}
 
     </LinearGradient>
   );
