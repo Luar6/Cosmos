@@ -40,7 +40,7 @@ export default function Agenda() {
 
         const url = `${process.env.EXPO_PUBLIC_API_URL}/getAllAgendasLinkedToUser?uid_do_responsavel=${userUid}&api_key=${process.env.EXPO_PUBLIC_API_KEY}`;
         console.log("Fetching agendas for UID:", userUid);
-
+        
         setLoading(true); // Start loading
 
         return fetch(url)

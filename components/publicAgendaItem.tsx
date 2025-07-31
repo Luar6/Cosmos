@@ -2,8 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "react-native-paper";
-import TaskInfo from './cardInfo';
-import TaskDel from "./cardDel";
+import { DelPublicTask } from "./deletePublicTask";
 
 type Task = {
     id: string;
@@ -11,22 +10,57 @@ type Task = {
     timestamp: string;
 };
 
-type Props = {
-    data: Task;
+type Agenda = {
+    id: string
+    uid_da_agenda: string
+    nome_agenda: string
+    chave_de_convite: string
+    firstCreated: string
 };
 
-export function PublicTaskItem({data}:Props) {
-    const [infoView, setInfoView] = useState(false);
-    const [delView, setDelView] = useState(false);
+type Props = {
+    data: Task;
+    agendaData: {
+        id: string
+        uid_da_agenda: string
+        nome_agenda: string;
+        chave_de_convite: string;
+        firstCreated: string;
+    }
+};
 
+export function PublicTaskItem({ agendaData, data }: Props) {
+    const [delView, setDelView] = useState(false);
     const { colors } = useTheme();
+    const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? '');
+
+    const deletarTask = async () => {
+        try {
+            const url = `${process.env.EXPO_PUBLIC_API_URL}/delete/agenda/tarefa?uid_da_agenda=${agendaData.uid_da_agenda}&uid_da_tarefa=${data.id}&api_key=${chave}`
+            const response = await fetch(url, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                console.log(`${response.status} - ${text}`);
+            }
+            console.log('tarefa deletada!');
+        } catch (err) {
+            console.log('erro ao deletar a tarefa: ', err)
+        }
+    }
+
+    const setDeleteAndClose = async () => {
+        await deletarTask();
+        console.log('operação finalizada');
+        setDelView(false);
+    }
 
     console.log(`Data do componente publicAgendaItem: ${JSON.stringify(data)}`)
 
     return (
         <View style={styles.container}>
             <TouchableOpacity
-                onPress={() => setInfoView(true)}
                 activeOpacity={0.85}
                 style={[
                     styles.card,
@@ -56,6 +90,10 @@ export function PublicTaskItem({data}:Props) {
                             color={colors.onPrimary}
                         />
                     </TouchableOpacity>
+
+                    <Modal visible={delView} transparent={true} animationType="fade">
+                        <DelPublicTask data={data} finalRemove={setDeleteAndClose} handleClose={() => setDelView(false)} />
+                    </Modal>
                 </View>
             </TouchableOpacity>
 
