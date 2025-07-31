@@ -1,10 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { AddTaskToAgenda } from '@/components/addTaskToAgenda';
 import { ConfigAgenda } from '@/components/configAgenda';
+import { PublicTaskItem } from '@/components/publicAgendaItem';
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { FAB } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = {
     data: {
@@ -17,10 +18,43 @@ type Props = {
     handleClose: () => void
 };
 
+type Task = {
+    name_task: string
+}
+
 export default function ViewAgenda({ data, handleClose }: Props) {
 
     const [configVisible, setConfigVisible] = useState(false);
     const [addTaskVisible, setAddTaskVisible] = useState(false);
+    const [arrayAgendaTasks, setArrayAgendaTasks] = useState<Task[]>([])
+
+    const chave = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY ?? '');
+
+    const loadTasks = async (): Promise<Task[]> => {
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/docs/getAllTarefasFromOneAgenda?uid_da_agenda=${data.uid_da_agenda}&api_key=${chave}`
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                const text = response.text();
+                console.log(`${response.status} - ${text}`);
+                return [];
+            }
+            const data: Task[] = await response.json()
+            return data;
+        } catch (err) {
+            console.log('erro ao puxar os dados', err);
+            return [];
+        }
+    }
+
+    useEffect(() => {
+        async function useLoad() {
+            const array: Task[] = await loadTasks();
+            setArrayAgendaTasks(array);
+        }
+        useLoad();
+    },[]);
 
     return (
         <SafeAreaView style={styles.container} edges={['left', 'right']}>
@@ -32,19 +66,31 @@ export default function ViewAgenda({ data, handleClose }: Props) {
                 <Pressable onPress={() => setConfigVisible(true)} style={styles.agendaConfig}>
                     <Text style={styles.title}>{data.nome_agenda}</Text>
                 </Pressable>
-
                 <Modal animationType="slide" visible={configVisible}>
                     <ConfigAgenda closeAll={handleClose} handleClose={() => setConfigVisible(false)} data={data} />
                 </Modal>
             </View>
+            <FlatList
+                data={arrayAgendaTasks}
+                keyExtractor={(item)=> item.name_task.toString()}
+                renderItem={({ item }) => {
+                    return <PublicTaskItem data={item} />
+                }}
+            />
 
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <Modal animationType='slide' visible={addTaskVisible} onRequestClose={() => setAddTaskVisible(false)}>
-                    <AddTaskToAgenda data={data} handleClose={() => setAddTaskVisible(false)} />
+                    <AddTaskToAgenda 
+                        data={data} 
+                        handleClose={() =>{ 
+                            setAddTaskVisible(false);
+                        }} 
+                    />
                 </Modal>
+
                 <FAB
                     icon="plus"
-                    onPress={()=> setAddTaskVisible(true)}
+                    onPress={() => setAddTaskVisible(true)}
                     style={styles.button}
                 />
             </View>

@@ -8,6 +8,8 @@ import { FlatList, Modal, RefreshControl, StyleSheet, Text, View } from "react-n
 import { ActivityIndicator, FAB } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CreateAgenda from "./createGroup";
+import { FAB, ActivityIndicator } from 'react-native-paper';
+import { ComeToGroup } from "@/components/comeToGroup";
 
 type Agendas = {
     uid_da_agenda: string
@@ -17,9 +19,11 @@ type Agendas = {
 };
 
 export default function Agenda() {
+
     const [userUid, setUserUid] = useState<string | null>(null);
     const [agendas, setAgendas] = useState<Record<string, Agendas>>({});
     const [refreshing, setRefreshing] = useState(true);
+    const [visibleComeInToGroup, setVisibleComeInToGroup] = useState(false);
     const [visibleCreateGroup, setVisibleCreate] = useState(false);
     const [loading, setLoading] = useState<boolean>(false);
     const focused = useIsFocused();
@@ -116,11 +120,22 @@ export default function Agenda() {
                     <CreateAgenda handleClose={() => setVisibleCreate(false)} onCreated={onAgendaCreated} />
                 </Modal>
 
+                <Modal transparent={true} visible={visibleComeInToGroup} animationType="fade">
+                    <ComeToGroup handleClose={()=> setVisibleComeInToGroup(false)}/>
+                </Modal>
+
                 <FAB
                     icon="plus"
                     label="Criar um grupo"
                     onPress={() => setVisibleCreate(true)}
                     style={styles.btnCreate}
+                />
+
+                <FAB
+                    icon="plus"
+                    label="Entrar num grupo"
+                    onPress={() => setVisibleComeInToGroup(true)}
+                    style={styles.btnAdd}
                 />
             </SafeAreaView>
         </View>
@@ -152,6 +167,13 @@ const styles = StyleSheet.create({
         right: 16,
         bottom: 16,
     },
+
+    btnAdd:{
+        position: 'absolute',
+        left: 16,
+        bottom: 16
+    },
+
     btnCreateTxt: {
         color: "#FFF",
         fontWeight: "bold",
